@@ -747,9 +747,6 @@ graphics::polygon(c(seq(year.start,year.end,year.duration),rev(seq(year.start,ye
 # graphics::lines(seq(year.start,year.end,year.duration),((region.occupation.population[,1] * 5)),col='black',lwd=3)
 graphics::lines(seq(year.start,year.end,year.duration),((region.occupation.population[,1] * mean(c(3.3,mean(c(5,7)))))),col='black',lwd=3)
 
-# (PINK) Guidelines for extrapolated/non-extrapolated population
-graphics::abline(v=c(758,1255),col='hotpink',lty=1,lwd=2,xpd=F)
-
 # (1) Axes and labels for plotting environment
 graphics::axis(1,at=seq(500,year.end,100),tick=T,labels=F,col='black')
 graphics::mtext(as.character(seq(500,year.end,100)),side=1,line=0.5,at=seq(500,1300,100),cex=0.75,col='black')
