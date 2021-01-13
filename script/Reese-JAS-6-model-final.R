@@ -23,7 +23,7 @@ node.iterations <- utils::read.csv(paste('/Users/kmreese/Documents/PROJECTS/CURR
 node.optimal.position <- which(node.iterations == max(node.iterations[,2:ncol(node.iterations)]),arr.ind=T)
 node.optimal <- node.iterations[node.optimal.position[1],1]
 percent.optimal <- (node.iterations[node.optimal.position[1],node.optimal.position[2]]) * 100
-smoothing.windows <- c(1:100)
+smoothing.windows <- c(1:50)
 window.optimal <- smoothing.windows[(node.optimal.position[2] - 1)]
 
 ##########################################################################################

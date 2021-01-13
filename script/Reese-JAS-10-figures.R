@@ -83,7 +83,7 @@ TeachingDemos::subplot(graphics::box(),x=raster::xmin(region.dem),y=raster::ymax
 
 # Federal land labels
 graphics::text(726000,4126000,'Mesa Verde National Park',col='darkgreen',cex=0.75)
-graphics::text(685000,4145000,'Canyon of the Ancients',col='darkgreen',cex=0.75)
+graphics::text(685000,4145000,'Canyons of the Ancients',col='darkgreen',cex=0.75)
 graphics::text(685000,4144000,'National Monument',col='darkgreen',cex=0.75)
 
 # State labels within Four Corners subplot
@@ -529,27 +529,13 @@ grDevices::dev.off()
 ##########################################################################################
 ## FIGURE 5: PREDICTIVE MODEL EXAMPLE FOR RESIDENTIAL SITE EXTRAPOLATION - AD 1060 WITH FOUR PITSTRUCTURES
 
-# Shapefile of total surveyed areas in central Mesa Verde region
-surveys.combined <- rgdal::readOGR('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/SHAPEFILES/BOUNDARIES/boundaries-survey/',layer='cmv-previous-coverage')
-raster::projection(surveys.combined) <- master.projection
-
-# Predictive example raster: AD 1060 with four pitstructures
-predictive.example <- raster::raster('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figures/predictive-example')
-raster::projection(predictive.example) <- master.projection
-
-# Raster of surveyed and unsurveyed areas
-surveyed.area <- raster::raster('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/area-surveyed')
-unsurveyed.area <- raster::raster('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/area-unsurveyed')
-
-# Predictive raster masked by surveyed and unsurveyed areas
-predictive.example.surveyed <- raster::mask(predictive.example,surveyed.area)
-predictive.example.unsurveyed <- raster::mask(predictive.example,unsurveyed.area)
-
 # Import occupation-by-households for use in predictive model
 occupation.households <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/occupation-by-household.csv')
 
 # Define example year, example site size, and subset occupation-by-households with example parameters
 sample.year <- 1060
+start <- sample.year - 410 - 20
+end <- sample.year - 410
 column <- which(colnames(occupation.households) == paste('X',sample.year,sep=''))
 dating.data <- occupation.households[which(occupation.households[,column] > 0 ),]
 dating.data <- dating.data[which(dating.data$PITSTRUCTURES == 4 ),]
@@ -558,7 +544,57 @@ dating.data <- dating.data[which(dating.data$PITSTRUCTURES == 4 ),]
 occupation.coords <- base::matrix(NA,nrow=nrow(dating.data),ncol=2)
 occupation.coords[,1] <- dating.data$X_COORDS
 occupation.coords[,2] <- dating.data$Y_COORDS
-occupation.coords <- sp::SpatialPointsDataFrame(coords=occupation.coords,dating.data,proj4string=master.projection)
+known.coordinates <- sp::SpatialPointsDataFrame(coords=occupation.coords,dating.data,proj4string=master.projection)
+
+# Rasters of surveyed areas for masking in predictive model
+surveyed.area <- raster::raster('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/area-surveyed')
+unsurveyed.area <- raster::raster('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/area-unsurveyed')
+
+# # Import topographic information for predictive layers 2--4 (region.dem is predictive layer 1), cost-surfaces for predictive layers 5--6, and environmental data for layers 7--9
+# region.slope <- raster::raster('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/vepii-n-slope')
+# region.aspect <- raster::raster('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/vepii-n-aspect')
+# region.flowdir <- raster::raster('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/vepii-n-flowdir')
+# cost.drainages <- raster::raster('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/COST-RASTERS/NORTHERN-SAN-JUAN/cost-to-drainages')
+# cost.rivers <- raster::raster('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/COST-RASTERS/NORTHERN-SAN-JUAN/cost-to-rivers')
+# growing.niche <- raster::brick('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/growing-niche')
+# raster::projection(growing.niche) <- master.projection
+# temperature <- raster::brick('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/temperature')
+# raster::projection(temperature) <- master.projection
+# precipitation <- raster::brick('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/precipitation')
+# raster::projection(precipitation) <- master.projection
+# 
+# # Create predictive raster stack with universal layers 1--6
+# # Prediction layer: Elevation
+# layer.1 <- raster::crop(region.dem,study.area.extent)
+# # Prediction layer: Slope
+# layer.2 <- raster::crop(region.slope,study.area.extent)
+# # Prediction layer: Aspect
+# layer.3 <- raster::crop(region.aspect,study.area.extent)
+# # Prediction layer: Flow direction
+# layer.4 <- raster::crop(region.flowdir,study.area.extent)
+# # Prediction layer: Distance to ephemeral water sources
+# layer.5 <- raster::crop(cost.drainages,study.area.extent)
+# # Prediction layer: Distance to permanent water sources
+# layer.6 <- raster::crop(cost.rivers,study.area.extent)
+# # Prediction layer: Average annual growing degree days (temperature), average previous 20 years
+# layer.7 <- raster::stackApply(temperature[[start:end]],indices=nlayers(temperature[[start:end]]),fun='mean')
+# # Prediction layer: Average annual precipitation, average previous 20 years
+# layer.8 <- raster::stackApply(precipitation[[start:end]],indices=nlayers(precipitation[[start:end]]),fun='mean')
+# # Prediction layer: Average annual maize growing niche, average previous 20 years
+# layer.9 <- raster::stackApply(growing.niche[[start:end]],indices=nlayers(growing.niche[[start:end]]),fun='mean')
+# # Universal predictive raster stack
+# raster.stack <- raster::stack(layer.1,layer.2,layer.3,layer.4,layer.5,layer.6,layer.7,layer.8,layer.9)
+# # Train the example predictive model
+# max.entropy <- dismo::maxent(raster.stack,sp::coordinates(known.coordinates),removeDuplicates=F)
+# raster.probabilities <- dismo::predict(max.entropy,raster.stack)
+# # Predictive example raster: AD 1060 with four pitstructures
+# predictive.example <- raster::writeRaster(raster.probabilities,'/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figures/predictive-example')
+predictive.example <- raster::raster('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figures/predictive-example')
+raster::projection(predictive.example) <- master.projection
+
+# Predictive raster masked by surveyed and unsurveyed areas
+predictive.example.surveyed <- raster::mask(predictive.example,surveyed.area)
+predictive.example.unsurveyed <- raster::mask(predictive.example,unsurveyed.area)
 
 ##########################################################################################
 ##########################################################################################
@@ -573,8 +609,7 @@ graphics::par(mfrow=c(2,2),bg=NA,mai=c(0.10,0.10,0.10,0.10),oma=c(0.5,0.5,0.5,0.
 graphics::plot(1,type="n",xlab='',ylab='',xlim=c(raster::xmin(region.dem),raster::xmax(region.dem)),ylim=c(raster::ymin(region.dem),raster::ymax(region.dem)),xaxs="i",yaxs="i",axes=F,main='')
 raster::plot(region.hillshade,col=colors,legend=F,add=T,axes=F)
 raster::plot(region.dem,col=scales::alpha(colors,alpha=0.40),add=T,axes=F,legend=F)
-raster::plot(vepii.survey,col=scales::alpha('gray40',alpha=0.6),border=NA,add=T,axes=F)
-raster::plot(mvnes.survey,col=scales::alpha('gray40',alpha=0.6),border=NA,add=T,axes=F)
+raster::plot(surveyed.area,col=scales::alpha('gray40',alpha=0.6),border=NA,add=T,axes=F,legend=F)
 
 # Known site locations
 graphics::points(coordinates(occupation.coords),cex=0.5,pch=3)
@@ -695,7 +730,7 @@ grDevices::dev.off()
 ## FIGURE 6: DEMOGRAPHICICS WITH KNOWN OCCUPIED HOUSEHOLDS, AND TOTAL POPULATION RECONSTRUCTION
 
 # VEP II midpoints of modeling periods
-vepii.midpoints <- c(600,662.5,762.5,820,860,900,950,1000,1040,1080,1120,1160,1202.5,1242.5,1270,1300)
+vepii.midpoints.rearranged <- c(600,662.5,740,840,880,900,920,980,1010,1048,1140,1154,1180,1260,1280,1300)
 
 # Total population calculated by Schwindt et al. 2016, reported in Table 2
 vepii.population <- c(0,262+2669,434+3103,1100+9423,1218+10300,962+3769,465+3693,533+8056,822+8560,1842+12792,2064+18677,2310+18688,3858+15320,7638+19057,6594+15198,0)
@@ -703,7 +738,6 @@ vepii.population <- c(0,262+2669,434+3103,1100+9423,1218+10300,962+3769,465+3693
 # Raw numbers of known habitation sites predicted to be occupied per year by the artificial neural network
 occupation.households <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/occupation-by-household.csv')
 sum.occupation.households <- as.matrix(as.numeric(colSums(occupation.households[,8:ncol(occupation.households)])))
-sum.occupation.households[(length(total.study.years)-20):length(total.study.years),] <- round(seq(sum.occupation.households[(length(total.study.years)-20),],0,(-sum.occupation.households[(length(total.study.years)-20),] / 20)))
 
 # Final population predictions with extrapolated results and smoothed by life-expectancy (file shows households, must be multiplied by 3, 5, and 7 for total range of potential numbers of people)
 region.occupation.population <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/final/region-occupation-by-population.csv',row.names=1)
@@ -715,10 +749,10 @@ grDevices::pdf('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figur
 graphics::par(mfrow=c(1,1),bg=NA,mai=c(0.5,0.6,0.10,0.6),oma=c(0.5,0.5,0.5,0.5))
 
 # Plotting environment
-graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end),ylim=c(0,4500),xaxs='i',yaxs='i',axes=F,main='')
+graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end+5),ylim=c(0,5500),xaxs='i',yaxs='i',axes=F,main='')
 
 # Pueblo time periods refined by this analysis
-graphics::abline(v=c(460,710,900,1150,1295),col='gray30',lty=5,lwd=1.5,xpd=F)
+graphics::abline(v=c(460,710,900,1150,1290),col='gray30',lty=5,lwd=1.5,xpd=F)
 
 # Periods of transition from exploration to exploitation, identified by results presented here, following @Bocinsky_et_al_2016
 graphics::abline(v=c(600,770,1035,1205),col='gray',lty=3,lwd=1.5,xpd=F)
@@ -727,25 +761,24 @@ graphics::abline(v=c(600,770,1035,1205),col='gray',lty=3,lwd=1.5,xpd=F)
 graphics::lines(seq(year.start,year.end,year.duration),sum.occupation.households,col='#9E0142',lwd=1)
 
 # (4) Axes and labels for plotting environment
-graphics::axis(4,at=seq(0,4000,1000),col='#9E0142',tick=T,labels=F)
-graphics::mtext(as.character(seq(0,4000,1000)),at=as.character(seq(0,4000,1000)),col='#9E0142',side=4,line=0.75,cex=0.75,las=2)
-graphics::mtext('Number of Recorded Households',col='#9E0142',side=4,line=2.5)
+graphics::axis(4,at=seq(0,5000,1000),col='#9E0142',tick=T,labels=F)
+graphics::mtext(as.character(seq(0,5000,1000)),at=as.character(seq(0,5000,1000)),col='#9E0142',side=4,line=0.75,cex=0.75,las=2)
+graphics::mtext('Number of Occupied Residences',col='#9E0142',side=4,line=2.5)
 
 # Call new plot
 graphics::par(new=T)
 
 # Plotting environment
-graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end),ylim=c(0,36000),xaxs='i',yaxs='i',axes=F,main='')
+graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end+5),ylim=c(0,31000),xaxs='i',yaxs='i',axes=F,main='')
 
 # (PURPLE) Previously-calculated VEP II results, plotted by midpoints of modeling periods
-graphics::lines(vepii.midpoints,(vepii.population),col=scales::alpha('#5E4FA2',alpha=0.4),lwd=1.5)
+graphics::lines(vepii.midpoints,(vepii.midpoints.rearranged),col=scales::alpha('#5E4FA2',alpha=0.4),lwd=1.5)
 
 # (GRAY) Final population predictions with extrapolated results and smoothed by life-expectancy (multiplied by 3 and 7)
 graphics::polygon(c(seq(year.start,year.end,year.duration),rev(seq(year.start,year.end,year.duration))),c((region.occupation.population[,1] * 6),rev((region.occupation.population[,1] * 3.3))),col=scales::alpha('gray40',alpha=0.4),border=NA)
 
 # (BLACK) Final population predictions with extrapolated results and smoothed by life-expectancy (multiplied by 5)
-# graphics::lines(seq(year.start,year.end,year.duration),((region.occupation.population[,1] * 5)),col='black',lwd=3)
-graphics::lines(seq(year.start,year.end,year.duration),((region.occupation.population[,1] * mean(c(3.3,mean(c(5,7)))))),col='black',lwd=3)
+graphics::lines(seq(year.start,year.end,year.duration),((region.occupation.population[,1] * mean(c(3.3,6)))),col='black',lwd=3)
 
 # (1) Axes and labels for plotting environment
 graphics::axis(1,at=seq(500,year.end,100),tick=T,labels=F,col='black')
@@ -753,21 +786,20 @@ graphics::mtext(as.character(seq(500,year.end,100)),side=1,line=0.5,at=seq(500,1
 graphics::mtext('Years (AD)',side=1,line=1.5,col='black')
 
 # (2) Axes and labels for plotting environment
-graphics::axis(2,at=seq(0,35000,5000),tick=T,labels=F)
-graphics::mtext(as.character(seq(0,35000,5000)),at=as.character(seq(0,35000,5000)),side=2,line=0.75,cex=0.75,las=2)
+graphics::axis(2,at=seq(0,30000,5000),tick=T,labels=F)
+graphics::mtext(as.character(seq(0,30000,5000)),at=as.character(seq(0,30000,5000)),side=2,line=0.75,cex=0.75,las=2)
 graphics::mtext('Total Regional Population',side=2,line=2.5)
+# graphics::mtext('Total Regional Population',side=2,line=3)
 
 # Labels for plot
-graphics::text(460+((710-460)/2),36000,'Basketmaker III',xpd=T)
-graphics::text(710+((900-710)/2),36000,'Pueblo I',xpd=T)
-graphics::text(900+((1150-900)/2),36000,'Pueblo II',xpd=T)
-graphics::text(1150+((1295-1150)/2),36000,'Pueblo III',xpd=T)
+graphics::text(460+((710-460)/2),31000,'Basketmaker III',xpd=T)
+graphics::text(710+((900-710)/2),31000,'Pueblo I',xpd=T)
+graphics::text(900+((1150-900)/2),31000,'Pueblo II',xpd=T)
+graphics::text(1150+((1295-1150)/2),31000,'Pueblo III',xpd=T)
 
 # Finish building figure
 grDevices::dev.off()
 
-##########################################################################################
-##########################################################################################
 ##########################################################################################
 ##########################################################################################
 ## Figure SI: Annual household density from AD 450--1300, standardized density range across years
@@ -881,122 +913,6 @@ for(i in column.start:column.end) {
     
     raster::plot(density.plot,zlim=c(min(density.extremes,na.rm=T),max(density.extremes,na.rm=T)),col=scales::alpha(heatcolors,alpha=0.4),add=T,axes=F,legend=F)
     graphics::contour(density.plot,zlim=c(min(density.extremes,na.rm=T),max(density.extremes,na.rm=T)),nlevels=5,add=T,axes=F,legend=F,labels='',lwd=0.5)
-    
-    graphics::text(raster::xmin(region.dem)-1000,raster::ymin(region.dem)+2000,as.character(year.sequence[i]),col='white',pos=4,cex=4)
-    
-    # Scale
-    graphics::segments(raster::xmax(region.dem)-16000,raster::ymin(region.dem)+1000,raster::xmax(region.dem)-6000,raster::ymin(region.dem)+1000,lwd=1.5)
-    graphics::segments(raster::xmax(region.dem)-16000,raster::ymin(region.dem)+1250,raster::xmax(region.dem)-16000,raster::ymin(region.dem)+750,lwd=1.5)
-    graphics::segments(raster::xmax(region.dem)-11000,raster::ymin(region.dem)+1250,raster::xmax(region.dem)-11000,raster::ymin(region.dem)+750,lwd=1.5)
-    graphics::segments(raster::xmax(region.dem)-6000,raster::ymin(region.dem)+1250,raster::xmax(region.dem)-6000,raster::ymin(region.dem)+750,lwd=1.5)
-    graphics::text(raster::xmax(region.dem)-15900,raster::ymin(region.dem)+975,'0',cex=0.7,pos=2)
-    graphics::text(raster::xmax(region.dem)-6100,raster::ymin(region.dem)+975,'10 km',cex=0.7,pos=4)
-    
-    # North arrow
-    graphics::segments(raster::xmax(region.dem)-1000,raster::ymin(region.dem)+750,raster::xmax(region.dem)-1000,raster::ymin(region.dem)+8750,lwd=1.5)
-    graphics::segments(raster::xmax(region.dem)-1000,raster::ymin(region.dem)+8750,raster::xmax(region.dem)-1750,raster::ymin(region.dem)+6750,lwd=1.5)
-    graphics::text(raster::xmax(region.dem)-1000,raster::ymin(region.dem)+4750,'N')
-    
-    # Framing box around plot
-    graphics::box()
-    
-    # Finish building figure
-    grDevices::dev.off()
-    
-  }
-  
-}
-
-##########################################################################################
-##########################################################################################
-##########################################################################################
-##########################################################################################
-## Figure SI: Annual population density from AD 450--1300, non-standardized density to highlight changes through time
-
-occupation.population <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/occupation-by-population.csv')
-
-year.start <- 450
-year.end <- 1300
-year.duration <- 1
-
-year.sequence <- seq((year.start-7),1300,1)
-
-occupation.information <- occupation.population
-column.start <- which(colnames(occupation.information) == paste('X',year.start,sep=''))
-column.end <- which(colnames(occupation.information) == paste('X',year.end,sep=''))
-occupation.information[,column.start:column.end] <- round(occupation.information[,column.start:column.end],digits=2)
-
-year <- seq(year.start,year.end,year.duration)
-
-for(i in column.start:column.end) {
-  
-  create.empty.plot <- FALSE
-  
-  dating.data <- occupation.information
-  time.period <- dating.data[which(dating.data[,i] > 0 ),]
-  
-  occupation.coords <- base::matrix(NA,nrow=nrow(time.period),ncol=2)
-  occupation.coords[,1] <- time.period$X_COORDS
-  occupation.coords[,2] <- time.period$Y_COORDS
-  
-  tryCatch({
-    
-    occupation.coords <- sp::SpatialPointsDataFrame(coords=occupation.coords,time.period,proj4string=master.projection)  },
-    
-    error = function(e) { create.empty.plot <<- TRUE})
-  
-  if(create.empty.plot == TRUE) {
-    
-    grDevices::pdf(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figures/stack-population-density/',names(time.period[i]),'.pdf',sep=''))
-    graphics::par(mfrow=c(1,1),bg=NA,mai=c(0.10,0.10,0.10,0.10),oma=c(0.5,0.5,0.5,0.5))
-    
-    graphics::plot(1,type="n",xlab='',ylab='',xlim=c(raster::xmin(region.dem),raster::xmax(region.dem)),ylim=c(raster::ymin(region.dem),raster::ymax(region.dem)),xaxs="i",yaxs="i",axes=F,main='')
-    raster::plot(region.hillshade,col=colors,legend=F,add=T,axes=F)
-    raster::plot(region.dem,col=scales::alpha(colors,alpha=0.40),add=T,axes=F,legend=F)
-    
-    graphics::rect(raster::xmin(region.dem),raster::ymin(region.dem),raster::xmax(region.dem),raster::ymax(region.dem),col=scales::alpha("#5E4FA2",alpha=0.4))
-    
-    graphics::text(raster::xmin(region.dem)-1000,raster::ymin(region.dem)+2000,as.character(year.sequence[i]),col='white',pos=4,cex=4)
-    
-    # Scale
-    graphics::segments(raster::xmax(region.dem)-16000,raster::ymin(region.dem)+1000,raster::xmax(region.dem)-6000,raster::ymin(region.dem)+1000,lwd=1.5)
-    graphics::segments(raster::xmax(region.dem)-16000,raster::ymin(region.dem)+1250,raster::xmax(region.dem)-16000,raster::ymin(region.dem)+750,lwd=1.5)
-    graphics::segments(raster::xmax(region.dem)-11000,raster::ymin(region.dem)+1250,raster::xmax(region.dem)-11000,raster::ymin(region.dem)+750,lwd=1.5)
-    graphics::segments(raster::xmax(region.dem)-6000,raster::ymin(region.dem)+1250,raster::xmax(region.dem)-6000,raster::ymin(region.dem)+750,lwd=1.5)
-    graphics::text(raster::xmax(region.dem)-15900,raster::ymin(region.dem)+975,'0',cex=0.7,pos=2)
-    graphics::text(raster::xmax(region.dem)-6100,raster::ymin(region.dem)+975,'10 km',cex=0.7,pos=4)
-    
-    # North arrow
-    graphics::segments(raster::xmax(region.dem)-1000,raster::ymin(region.dem)+750,raster::xmax(region.dem)-1000,raster::ymin(region.dem)+8750,lwd=1.5)
-    graphics::segments(raster::xmax(region.dem)-1000,raster::ymin(region.dem)+8750,raster::xmax(region.dem)-1750,raster::ymin(region.dem)+6750,lwd=1.5)
-    graphics::text(raster::xmax(region.dem)-1000,raster::ymin(region.dem)+4750,'N')
-    
-    # Framing box around plot
-    graphics::box()
-    
-    # Finish building figure
-    grDevices::dev.off()
-    
-  }
-  
-  else{
-    
-    occupation.coords <- sp::SpatialPointsDataFrame(coords=occupation.coords,time.period,proj4string=master.projection)
-    occupation.coords <- occupation.coords[study.area.extent,]
-    
-    occupation.datums <- matrix(coordinates(occupation.coords),ncol=2,byrow=FALSE)
-    density.points <- spatstat::as.ppp(occupation.datums,W=spatstat::owin(xrange=c(raster::xmin(region.dem),raster::xmax(region.dem)),yrange=c(raster::ymin(region.dem),raster::ymax(region.dem))))
-    density.plot <- stats::density(density.points,weights=as.numeric(occupation.coords@data[,i]),adjust=0.1)
-    
-    grDevices::pdf(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figures/stack-population-density/',names(time.period[i]),'.pdf',sep=''))
-    graphics::par(mfrow=c(1,1),bg=NA,mai=c(0.10,0.10,0.10,0.10),oma=c(0.5,0.5,0.5,0.5))
-    
-    graphics::plot(1,type="n",xlab='',ylab='',xlim=c(raster::xmin(region.dem),raster::xmax(region.dem)),ylim=c(raster::ymin(region.dem),raster::ymax(region.dem)),xaxs="i",yaxs="i",axes=F,main='')
-    raster::plot(region.hillshade,col=colors,legend=F,add=T,axes=F)
-    raster::plot(region.dem,col=scales::alpha(colors,alpha=0.40),add=T,axes=F,legend=F)
-    
-    raster::plot(density.plot,col=scales::alpha(heatcolors,alpha=0.4),add=T,axes=F,legend=F)
-    graphics::contour(density.plot,nlevels=5,add=T,axes=F,legend=F,labels='',lwd=0.5)
     
     graphics::text(raster::xmin(region.dem)-1000,raster::ymin(region.dem)+2000,as.character(year.sequence[i]),col='white',pos=4,cex=4)
     

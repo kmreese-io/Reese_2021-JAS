@@ -17,54 +17,54 @@ year.start <- 450
 year.end <- utils::tail(seq(year.start,1300,year.duration),n=1)
 tree.rings.aggregated <- tree.rings.aggregated.1
 
-##########################################################################################
-## Calculate topographic information for predictive layers 2--4 (region.dem is predictive layer 1)
-region.slope <- raster::terrain(region.dem,'slope')
-raster::writeRaster(region.slope,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/vepii-n-slope')
-region.aspect <- raster::terrain(region.dem,'aspect')
-raster::writeRaster(region.aspect,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/vepii-n-aspect')
-region.flowdir <- raster::terrain(region.dem,'flowdir')
-raster::writeRaster(region.flowdir,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/vepii-n-flowdir')
-
-##########################################################################################
-## Create cost-raster from region.dem
-clusters <- parallel::makeCluster(parallel::detectCores() - 1)
-doParallel::registerDoParallel(clusters)
-require(gdistance)
-n.directions <- 4
-heightDiff <- function(x){x[2] - x[1]}
-hd <- gdistance::transition(region.dem,heightDiff,directions=n.directions,symm=F)
-slope <- gdistance::geoCorrection(hd)
-adj <- raster::adjacent(region.dem,cells=1:ncell(region.dem),pairs=T,directions=n.directions)
-speed <- slope
-speed[adj] <- ((6 * exp(-3.5 * abs(slope[adj] + 0.05))) * 1000)
-cost.raster <- gdistance::geoCorrection(speed)
-parallel::stopCluster(clusters)
-
-##########################################################################################
-## Export cost-raster
-base::saveRDS(cost.raster,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/COST-RASTERS/NORTHERN-SAN-JUAN/cost-raster-4')
-cost.raster <- base::readRDS('./database/SPATIAL/DEM/COST/cost-raster-4')
-
-##########################################################################################
-## Import ephemeral drainage and permanent river resources, calculate accumulated cost to resources across study area, and export cost-surfaces
-# Ephemeral drainages
-drainages <- rgdal::readOGR('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/SHAPEFILES/HYDROGRAPHY/NORTHERN-SAN-JUAN',layer='VEPIIN-HYDRO')
-projection(drainages) <- master.projection
-drainages.limited <- raster::crop(drainages,study.area.extent)
-drainage.points <- as(drainages.limited,'SpatialPoints')
-cost <- gdistance::accCost(cost.raster,coordinates(drainage.points))
-cost <- raster::resample(cost,region.dem)
-raster::writeRaster(cost,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/COST-RASTERS/NORTHERN-SAN-JUAN/cost-to-drainages')
-# Permanent rivers
-rivers <- rgdal::readOGR('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/SHAPEFILES/HYDROGRAPHY/rivers-us',layer='us-rivers')
-rivers <- sp::spTransform(rivers,master.projection)
-rivers.limited <- raster::crop(rivers,study.area.extent)
-river.points <- as(rivers.limited,'SpatialPoints')
-cost <- gdistance::accCost(cost.raster,coordinates(river.points))
-cost <- raster::resample(cost,region.dem)
-raster::writeRaster(cost,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/COST-RASTERS/NORTHERN-SAN-JUAN/cost-to-rivers')
-
+# ##########################################################################################
+# ## Calculate topographic information for predictive layers 2--4 (region.dem is predictive layer 1)
+# region.slope <- raster::terrain(region.dem,'slope')
+# raster::writeRaster(region.slope,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/vepii-n-slope')
+# region.aspect <- raster::terrain(region.dem,'aspect')
+# raster::writeRaster(region.aspect,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/vepii-n-aspect')
+# region.flowdir <- raster::terrain(region.dem,'flowdir')
+# raster::writeRaster(region.flowdir,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/vepii-n-flowdir')
+# 
+# ##########################################################################################
+# ## Create cost-raster from region.dem
+# clusters <- parallel::makeCluster(parallel::detectCores() - 1)
+# doParallel::registerDoParallel(clusters)
+# require(gdistance)
+# n.directions <- 4
+# heightDiff <- function(x){x[2] - x[1]}
+# hd <- gdistance::transition(region.dem,heightDiff,directions=n.directions,symm=F)
+# slope <- gdistance::geoCorrection(hd)
+# adj <- raster::adjacent(region.dem,cells=1:ncell(region.dem),pairs=T,directions=n.directions)
+# speed <- slope
+# speed[adj] <- ((6 * exp(-3.5 * abs(slope[adj] + 0.05))) * 1000)
+# cost.raster <- gdistance::geoCorrection(speed)
+# parallel::stopCluster(clusters)
+# 
+# ##########################################################################################
+# ## Export cost-raster
+# base::saveRDS(cost.raster,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/COST-RASTERS/NORTHERN-SAN-JUAN/cost-raster-4')
+# cost.raster <- base::readRDS('./database/SPATIAL/DEM/COST/cost-raster-4')
+# 
+# ##########################################################################################
+# ## Import ephemeral drainage and permanent river resources, calculate accumulated cost to resources across study area, and export cost-surfaces
+# # Ephemeral drainages
+# drainages <- rgdal::readOGR('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/SHAPEFILES/HYDROGRAPHY/NORTHERN-SAN-JUAN',layer='VEPIIN-HYDRO')
+# projection(drainages) <- master.projection
+# drainages.limited <- raster::crop(drainages,study.area.extent)
+# drainage.points <- as(drainages.limited,'SpatialPoints')
+# cost <- gdistance::accCost(cost.raster,coordinates(drainage.points))
+# cost <- raster::resample(cost,region.dem)
+# raster::writeRaster(cost,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/COST-RASTERS/NORTHERN-SAN-JUAN/cost-to-drainages')
+# # Permanent rivers
+# rivers <- rgdal::readOGR('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/SHAPEFILES/HYDROGRAPHY/rivers-us',layer='us-rivers')
+# rivers <- sp::spTransform(rivers,master.projection)
+# rivers.limited <- raster::crop(rivers,study.area.extent)
+# river.points <- as(rivers.limited,'SpatialPoints')
+# cost <- gdistance::accCost(cost.raster,coordinates(river.points))
+# cost <- raster::resample(cost,region.dem)
+# raster::writeRaster(cost,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/COST-RASTERS/NORTHERN-SAN-JUAN/cost-to-rivers')
+# 
 ##########################################################################################
 ## Import topographic information for predictive layers 2--4 (region.dem is predictive layer 1), and cost-surfaces for predictive layers 5--6
 region.slope <- raster::raster('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/vepii-n-slope')
@@ -90,47 +90,47 @@ layer.6 <- raster::crop(cost.rivers,study.area.extent)
 # Universal predictive raster stack
 prior.stack <- raster::stack(layer.1,layer.2,layer.3,layer.4,layer.5,layer.6)
 
-##########################################################################################
-## Download growing niche information for study area
-study.area.extent.longlat <- sp::spTransform(study.area.extent,longlat.projection)
-reconstruction <- paleocar::get_bocinsky2016(template = study.area.extent.longlat,
-                                             label = 'VEPIIN-GN',
-                                             raw.dir = '/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/PALEOCAR/RAW',
-                                             extraction.dir = '/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/PALEOCAR/EXTRACTIONS/',
-                                             prcp_threshold = 300,
-                                             gdd_threshold = 1800,
-                                             years = 1:2000,
-                                             force.redo = F)
-
-##########################################################################################
-## Isolate growing niche, reproject raster stacks, resample to 10 m resolution, and export processed raster stacks
-growing.niche <- reconstruction$niche[[(year.start-20):year.end]]
-raster::projection(growing.niche) <- longlat.projection
-growing.niche <- raster::projectRaster(growing.niche,crs=master.projection,method='ngb')
-foreach::registerDoSEQ()
-growing.niche.resample <- raster::resample(growing.niche,region.dem)
-raster::writeRaster(growing.niche.resample,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/growing-niche',overwrite=T)
-
-##########################################################################################
-## Isolate temperature, reproject raster stacks, resample to 10 m resolution, and export processed raster stacks
-temperature <- raster::brick('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/PALEOCAR/EXTRACTIONS/GDD_1-2000.tif')
-temperature <- temperature[[(year.start-20):year.end]]
-raster::projection(temperature) <- longlat.projection
-temperature <- raster::projectRaster(temperature,crs=master.projection,method='ngb')
-foreach::registerDoSEQ()
-temperature.resample <- raster::resample(temperature,region.dem)
-raster::writeRaster(temperature.resample,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/temperature',overwrite=T)
-
-##########################################################################################
-## Isolate precipitation, reproject raster stacks, resample to 10 m resolution, and export processed raster stacks
-precipitation <- raster::brick('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/PALEOCAR/EXTRACTIONS/PPT_1-2000.tif')
-precipitation <- precipitation[[(year.start-20):year.end]]
-raster::projection(precipitation) <- longlat.projection
-precipitation <- raster::projectRaster(precipitation,crs=master.projection,method='ngb')
-foreach::registerDoSEQ()
-precipitation.resample <- raster::resample(precipitation,region.dem)
-raster::writeRaster(precipitation.resample,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/precipitation',overwrite=T)
-
+# ##########################################################################################
+# ## Download growing niche information for study area
+# study.area.extent.longlat <- sp::spTransform(study.area.extent,longlat.projection)
+# reconstruction <- paleocar::get_bocinsky2016(template = study.area.extent.longlat,
+#                                              label = 'VEPIIN-GN',
+#                                              raw.dir = '/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/PALEOCAR/RAW',
+#                                              extraction.dir = '/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/PALEOCAR/EXTRACTIONS/',
+#                                              prcp_threshold = 300,
+#                                              gdd_threshold = 1800,
+#                                              years = 1:2000,
+#                                              force.redo = F)
+# 
+# ##########################################################################################
+# ## Isolate growing niche, reproject raster stacks, resample to 10 m resolution, and export processed raster stacks
+# growing.niche <- reconstruction$niche[[(year.start-20):year.end]]
+# raster::projection(growing.niche) <- longlat.projection
+# growing.niche <- raster::projectRaster(growing.niche,crs=master.projection,method='ngb')
+# foreach::registerDoSEQ()
+# growing.niche.resample <- raster::resample(growing.niche,region.dem)
+# raster::writeRaster(growing.niche.resample,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/growing-niche',overwrite=T)
+# 
+# ##########################################################################################
+# ## Isolate temperature, reproject raster stacks, resample to 10 m resolution, and export processed raster stacks
+# temperature <- raster::brick('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/PALEOCAR/EXTRACTIONS/GDD_1-2000.tif')
+# temperature <- temperature[[(year.start-20):year.end]]
+# raster::projection(temperature) <- longlat.projection
+# temperature <- raster::projectRaster(temperature,crs=master.projection,method='ngb')
+# foreach::registerDoSEQ()
+# temperature.resample <- raster::resample(temperature,region.dem)
+# raster::writeRaster(temperature.resample,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/temperature',overwrite=T)
+# 
+# ##########################################################################################
+# ## Isolate precipitation, reproject raster stacks, resample to 10 m resolution, and export processed raster stacks
+# precipitation <- raster::brick('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/PALEOCAR/EXTRACTIONS/PPT_1-2000.tif')
+# precipitation <- precipitation[[(year.start-20):year.end]]
+# raster::projection(precipitation) <- longlat.projection
+# precipitation <- raster::projectRaster(precipitation,crs=master.projection,method='ngb')
+# foreach::registerDoSEQ()
+# precipitation.resample <- raster::resample(precipitation,region.dem)
+# raster::writeRaster(precipitation.resample,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/precipitation',overwrite=T)
+# 
 ##########################################################################################
 ## Import growing niche, temperature, and precipitation raster stacks for predictive layers 7--9
 growing.niche <- raster::brick('/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/growing-niche')
@@ -159,7 +159,7 @@ utils::write.csv(total.extrapolated.households,file='/Users/kmreese/Documents/PR
 ## Household extrapolation model from surveyed to unsurveyed areas
 
 for(years in 8:ncol(small.sites)) {
-  
+
   # Load file with extrapolated predictions
   total.extrapolated.households <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/extrapolated-occupation-by-household.csv',header=T,row.names=1)
   # Identify households occupied with 1--8 pitstructures for given year
@@ -181,7 +181,7 @@ for(years in 8:ncol(small.sites)) {
   
   if(no.occupation == TRUE) {
     
-    total.extrapolated.houseolds[,years-7] <- 0
+    total.extrapolated.households[,years-7] <- 0
     
   }
   
@@ -203,7 +203,7 @@ for(years in 8:ncol(small.sites)) {
     raster.stack <- raster::stack(prior.stack,layer.7,layer.8,layer.9)
     
     # Begin parallel computing environment
-    clusters <- parallel::makeCluster(parallel::detectCores() - 1)
+    clusters <- parallel::makeCluster(8)
     doParallel::registerDoParallel(clusters)
     
     # Complete predictive model for sites by total number of recorded pitstructures 1--8
@@ -242,17 +242,17 @@ for(years in 8:ncol(small.sites)) {
         names(known.coordinates) <- names(sites.by.pitstructure)
         
         # Run predictive model using complete set of predictive raster layers 1--9 and coordinates of occupied households with given number of pitstructures
-        max.entropy <- dismo::maxent(raster.stack,coordinates(known.coordinates),removeDuplicates=F)
+        max.entropy <- dismo::maxent(raster.stack,sp::coordinates(known.coordinates),removeDuplicates=F)
         raster.probabilities <- dismo::predict(max.entropy,raster.stack)
         
         # Extract predictive probabilities for knowingly occupied cells and average predictive values
-        mean.probabilities <- mean(raster:::extract(raster.probabilities,coordinates(known.coordinates)))
+        mean.probabilities <- mean(raster:::extract(raster.probabilities,sp::coordinates(known.coordinates)))
         
         # Limit predictive raster values by surveyed area
         raster.probabilities.surveyed <- raster::mask(raster.probabilities,surveyed.area)
         
         # Determine ratio of knowingly occupied cells within surveyed area with total surveyed cells with predictive raster values >= average predictive values of knowingly occupied raster cells
-        proportion.locations.surveyed <- nrow(coordinates(known.coordinates)) / length(raster.probabilities.surveyed[raster.probabilities.surveyed >= mean.probabilities])
+        proportion.locations.surveyed <- nrow(sp::coordinates(known.coordinates)) / length(raster.probabilities.surveyed[raster.probabilities.surveyed >= mean.probabilities])
         
         # Limit predictive raster values by unsurveyed area
         raster.probabilities.unsurveyed <- raster::mask(raster.probabilities,unsurveyed.area)

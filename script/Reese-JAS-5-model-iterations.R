@@ -19,9 +19,10 @@ tree.rings.aggregated <- tree.rings.aggregated.1
 # Create directories for saving results based on model universals
 base::dir.create(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-iterations/',year.start,'-',year.end,'x',year.duration,sep=''),showWarnings=F)
 base::setwd(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-iterations/',year.start,'-',year.end,'x',year.duration,sep=''))
-base::dir.create('./smoothing-windows/annual',showWarnings=F)
-base::dir.create('./smoothing-windows/lower',showWarnings=F)
-base::dir.create('./smoothing-windows/upper',showWarnings=F)
+base::dir.create('./models',showWarnings=F)
+base::dir.create('./smoothing-windows/annual',recursive=T,showWarnings=F)
+base::dir.create('./smoothing-windows/lower',recursive=T,showWarnings=F)
+base::dir.create('./smoothing-windows/upper',recursive=T,showWarnings=F)
 base::dir.create('./smoothing-tests',showWarnings=F)
 
 # Combine columns of ceramics with overlapping typologies 
@@ -30,7 +31,10 @@ dataset$BW_MANCOS <- dplyr::coalesce(dataset$BW_MANCOS,dataset$BW_WETHERILL)
 dataset <- base::as.data.frame(dataset %>% dplyr::select('SITE_ID','GRAY_CHAPIN','GRAY_MOCCASIN','GRAY_MANCOS','CORRUGATED_DOLORES','CORRUGATED_MESAVERDE','RO_ABAJO','BR_BLUFF','BR_DEADMANS','BW_CHAPIN','BW_PIEDRA','BW_CORTEZ','BW_MANCOS','BW_MCELMO','BW_MESAVERDE',paste('X',as.character(year.start),sep=''):ncol(dataset)))
 
 # Run the neural network with input parameters defined above and save results to working directory
+clusters <- parallel::makeCluster(parallel::detectCores() - 1)
+doParallel::registerDoParallel(clusters)
 annIterations(dataset)
+parallel::stopCluster(clusters)
 
 ##########################################################################################
 ##########################################################################################
@@ -43,9 +47,10 @@ tree.rings.aggregated <- tree.rings.aggregated.1
 # Create directories for saving results based on model universals
 base::dir.create(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-iterations/',year.start,'-',year.end,'x',year.duration,sep=''),showWarnings=F)
 base::setwd(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-iterations/',year.start,'-',year.end,'x',year.duration,sep=''))
-base::dir.create('./smoothing-windows/annual',showWarnings=F)
-base::dir.create('./smoothing-windows/lower',showWarnings=F)
-base::dir.create('./smoothing-windows/upper',showWarnings=F)
+base::dir.create('./models',showWarnings=F)
+base::dir.create('./smoothing-windows/annual',recursive=T,showWarnings=F)
+base::dir.create('./smoothing-windows/lower',recursive=T,showWarnings=F)
+base::dir.create('./smoothing-windows/upper',recursive=T,showWarnings=F)
 base::dir.create('./smoothing-tests',showWarnings=F)
 
 # Combine columns of ceramics with overlapping typologies 
@@ -54,7 +59,10 @@ dataset$BW_MANCOS <- dplyr::coalesce(dataset$BW_MANCOS,dataset$BW_WETHERILL)
 dataset <- base::as.data.frame(dataset %>% dplyr::select('SITE_ID','GRAY_CHAPIN','GRAY_MOCCASIN','GRAY_MANCOS','CORRUGATED_DOLORES','CORRUGATED_MESAVERDE','RO_ABAJO','BR_BLUFF','BR_DEADMANS','BW_CHAPIN','BW_PIEDRA','BW_CORTEZ','BW_MANCOS','BW_MCELMO','BW_MESAVERDE',paste('X',as.character(year.start),sep=''):ncol(dataset)))
 
 # Run the neural network with input parameters defined above and save results to working directory
+clusters <- parallel::makeCluster(parallel::detectCores() - 1)
+doParallel::registerDoParallel(clusters)
 annIterations(dataset)
+parallel::stopCluster(clusters)
 
 ##########################################################################################
 ##########################################################################################
@@ -67,9 +75,10 @@ tree.rings.aggregated <- tree.rings.aggregated.1
 # Create directories for saving results based on model universals
 base::dir.create(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-iterations/',year.start,'-',year.end,'x',year.duration,sep=''),showWarnings=F)
 base::setwd(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-iterations/',year.start,'-',year.end,'x',year.duration,sep=''))
-base::dir.create('./smoothing-windows/annual',showWarnings=F)
-base::dir.create('./smoothing-windows/lower',showWarnings=F)
-base::dir.create('./smoothing-windows/upper',showWarnings=F)
+base::dir.create('./models',showWarnings=F)
+base::dir.create('./smoothing-windows/annual',recursive=T,showWarnings=F)
+base::dir.create('./smoothing-windows/lower',recursive=T,showWarnings=F)
+base::dir.create('./smoothing-windows/upper',recursive=T,showWarnings=F)
 base::dir.create('./smoothing-tests',showWarnings=F)
 
 # Combine columns of ceramics with overlapping typologies 
@@ -78,7 +87,10 @@ dataset$BW_MANCOS <- dplyr::coalesce(dataset$BW_MANCOS,dataset$BW_WETHERILL)
 dataset <- base::as.data.frame(dataset %>% dplyr::select('SITE_ID','GRAY_CHAPIN','GRAY_MOCCASIN','GRAY_MANCOS','CORRUGATED_DOLORES','CORRUGATED_MESAVERDE','RO_ABAJO','BR_BLUFF','BR_DEADMANS','BW_CHAPIN','BW_PIEDRA','BW_CORTEZ','BW_MANCOS','BW_MCELMO','BW_MESAVERDE',paste('X',as.character(year.start),sep=''):ncol(dataset)))
 
 # Run the neural network with input parameters defined above and save results to working directory
+clusters <- parallel::makeCluster(parallel::detectCores() - 1)
+doParallel::registerDoParallel(clusters)
 annIterations(dataset)
+parallel::stopCluster(clusters)
 
 ##########################################################################################
 ##########################################################################################
@@ -91,9 +103,10 @@ tree.rings.aggregated <- tree.rings.aggregated.10
 # Create directories for saving results based on model universals
 base::dir.create(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-iterations/',year.start,'-',year.end,'x',year.duration,sep=''),showWarnings=F)
 base::setwd(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-iterations/',year.start,'-',year.end,'x',year.duration,sep=''))
-base::dir.create('./smoothing-windows/annual',showWarnings=F)
-base::dir.create('./smoothing-windows/lower',showWarnings=F)
-base::dir.create('./smoothing-windows/upper',showWarnings=F)
+base::dir.create('./models',showWarnings=F)
+base::dir.create('./smoothing-windows/annual',recursive=T,showWarnings=F)
+base::dir.create('./smoothing-windows/lower',recursive=T,showWarnings=F)
+base::dir.create('./smoothing-windows/upper',recursive=T,showWarnings=F)
 base::dir.create('./smoothing-tests',showWarnings=F)
 
 # Combine columns of ceramics with overlapping typologies 
@@ -102,7 +115,10 @@ dataset$BW_MANCOS <- dplyr::coalesce(dataset$BW_MANCOS,dataset$BW_WETHERILL)
 dataset <- base::as.data.frame(dataset %>% dplyr::select('SITE_ID','GRAY_CHAPIN','GRAY_MOCCASIN','GRAY_MANCOS','CORRUGATED_DOLORES','CORRUGATED_MESAVERDE','RO_ABAJO','BR_BLUFF','BR_DEADMANS','BW_CHAPIN','BW_PIEDRA','BW_CORTEZ','BW_MANCOS','BW_MCELMO','BW_MESAVERDE',paste('X',as.character(year.start),sep=''):ncol(dataset)))
 
 # Run the neural network with input parameters defined above and save results to working directory
+clusters <- parallel::makeCluster(parallel::detectCores() - 1)
+doParallel::registerDoParallel(clusters)
 annIterations(dataset)
+parallel::stopCluster(clusters)
 
 ##########################################################################################
 ##########################################################################################
@@ -115,9 +131,10 @@ tree.rings.aggregated <- tree.rings.aggregated.20
 # Create directories for saving results based on model universals
 base::dir.create(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-iterations/',year.start,'-',year.end,'x',year.duration,sep=''),showWarnings=F)
 base::setwd(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-iterations/',year.start,'-',year.end,'x',year.duration,sep=''))
-base::dir.create('./smoothing-windows/annual',showWarnings=F)
-base::dir.create('./smoothing-windows/lower',showWarnings=F)
-base::dir.create('./smoothing-windows/upper',showWarnings=F)
+base::dir.create('./models',showWarnings=F)
+base::dir.create('./smoothing-windows/annual',recursive=T,showWarnings=F)
+base::dir.create('./smoothing-windows/lower',recursive=T,showWarnings=F)
+base::dir.create('./smoothing-windows/upper',recursive=T,showWarnings=F)
 base::dir.create('./smoothing-tests',showWarnings=F)
 
 # Combine columns of ceramics with overlapping typologies 
@@ -126,7 +143,10 @@ dataset$BW_MANCOS <- dplyr::coalesce(dataset$BW_MANCOS,dataset$BW_WETHERILL)
 dataset <- base::as.data.frame(dataset %>% dplyr::select('SITE_ID','GRAY_CHAPIN','GRAY_MOCCASIN','GRAY_MANCOS','CORRUGATED_DOLORES','CORRUGATED_MESAVERDE','RO_ABAJO','BR_BLUFF','BR_DEADMANS','BW_CHAPIN','BW_PIEDRA','BW_CORTEZ','BW_MANCOS','BW_MCELMO','BW_MESAVERDE',paste('X',as.character(year.start),sep=''):ncol(dataset)))
 
 # Run the neural network with input parameters defined above and save results to working directory
+clusters <- parallel::makeCluster(parallel::detectCores() - 1)
+doParallel::registerDoParallel(clusters)
 annIterations(dataset)
+parallel::stopCluster(clusters)
 
 ##########################################################################################
 ##########################################################################################
@@ -139,9 +159,10 @@ tree.rings.aggregated <- tree.rings.aggregated.30
 # Create directories for saving results based on model universals
 base::dir.create(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-iterations/',year.start,'-',year.end,'x',year.duration,sep=''),showWarnings=F)
 base::setwd(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-iterations/',year.start,'-',year.end,'x',year.duration,sep=''))
-base::dir.create('./smoothing-windows/annual',showWarnings=F)
-base::dir.create('./smoothing-windows/lower',showWarnings=F)
-base::dir.create('./smoothing-windows/upper',showWarnings=F)
+base::dir.create('./models',showWarnings=F)
+base::dir.create('./smoothing-windows/annual',recursive=T,showWarnings=F)
+base::dir.create('./smoothing-windows/lower',recursive=T,showWarnings=F)
+base::dir.create('./smoothing-windows/upper',recursive=T,showWarnings=F)
 base::dir.create('./smoothing-tests',showWarnings=F)
 
 # Combine columns of ceramics with overlapping typologies 
@@ -150,7 +171,10 @@ dataset$BW_MANCOS <- dplyr::coalesce(dataset$BW_MANCOS,dataset$BW_WETHERILL)
 dataset <- base::as.data.frame(dataset %>% dplyr::select('SITE_ID','GRAY_CHAPIN','GRAY_MOCCASIN','GRAY_MANCOS','CORRUGATED_DOLORES','CORRUGATED_MESAVERDE','RO_ABAJO','BR_BLUFF','BR_DEADMANS','BW_CHAPIN','BW_PIEDRA','BW_CORTEZ','BW_MANCOS','BW_MCELMO','BW_MESAVERDE',paste('X',as.character(year.start),sep=''):ncol(dataset)))
 
 # Run the neural network with input parameters defined above and save results to working directory
+clusters <- parallel::makeCluster(parallel::detectCores() - 1)
+doParallel::registerDoParallel(clusters)
 annIterations(dataset)
+parallel::stopCluster(clusters)
 
 ##########################################################################################
 ##########################################################################################

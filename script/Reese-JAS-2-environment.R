@@ -51,18 +51,17 @@ vepii.tree.rings <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/DATABASE/
 
 ##########################################################################################
 ## Survey coverage and proportion of surveyed/unsurveyed areas
-# surveys.combined <- rgeos::gSymdifference(vepii.survey,mvnes.survey)
-# rgdal::writeOGR(as(surveys.combined,'SpatialPolygonsDataFrame'),'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/SHAPEFILES/BOUNDARIES/boundaries-survey/',driver='ESRI Shapefile',layer='cmv-previous-coverage')
-# n.raster.cells.total <- ncell(region.dem)
-# unsurveyed.area <- raster::mask(region.dem,surveys.combined,inverse=T)
-# raster::writeRaster(unsurveyed.area,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/area-unsurveyed',overwrite=T)
-# surveyed.area <- raster::mask(region.dem,unsurveyed.area,inverse=T)
+# survey.vepii <- raster::mask(region.dem,vepii.survey)
+# survey.mvnes <- raster::mask(region.dem,mvnes.survey)
+# surveyed.area <- raster::merge(survey.vepii,survey.mvnes)
 # raster::writeRaster(surveyed.area,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/area-surveyed',overwrite=T)
-
-# n.raster.cells.surveyed <- n.raster.cells.total - cellStats(surveyed.area,'countNA')
-# n.raster.cells.unsurveyed <- n.raster.cells.total - n.raster.cells.surveyed
-n.raster.cells.surveyed <- 11560247
-n.raster.cells.unsurveyed <- 42609163
+# unsurveyed.area <- raster::mask(region.dem,surveyed.area,inverse=T)
+# raster::writeRaster(unsurveyed.area,'/Users/kmreese/Documents/PROJECTS/DATABASE/SPATIAL/DEM/REGIONS/NORTHERN-SAN-JUAN/area-unsurveyed',overwrite=T)
+# 
+# n.raster.cells.surveyed <- ncell(region.dem) - cellStats(surveyed.area,'countNA')
+# n.raster.cells.unsurveyed <- ncell(region.dem) - n.raster.cells.surveyed
+n.raster.cells.surveyed <- 11606270
+n.raster.cells.unsurveyed <- 42563140
 
 ##########################################################################################
 ##########################################################################################

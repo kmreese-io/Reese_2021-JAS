@@ -23,7 +23,7 @@ annIterations <- function(x,...){
   # Identify columns with predictive variables (ceramic data)
   variable.columns <- length(2:which(colnames(test.set.original) == paste('X',year.start,sep='')))
   
-  # Remove columns with no instances of predictive variables (no ceramic tallies)
+  # Remove rows with no instances of predictive variables (no ceramic tallies)
   training.set.original <- training.set.original[rowSums(training.set.original[,2:variable.columns]) != 0 , ]
   test.set.original <- test.set.original[rowSums(test.set.original[,2:variable.columns]) != 0 , ]
   
@@ -57,7 +57,8 @@ annIterations <- function(x,...){
   ann.formula <- stats::as.formula(paste(paste(dependent,collapse='+'),' ~ ',paste(independent,collapse='+')))
   
   # Run loop of all potential single layer values, from 1 to sum(length(independent),length(dependent)) variables
-  for(h in length(independent):length(dependent)) {
+  # for(h in length(independent):length(dependent)) {
+  for(h in 142:length(dependent)) {
     
     # Train artificial neural network model
     ann.model <- neuralnet::neuralnet(formula = ann.formula,     
@@ -85,8 +86,8 @@ annIterations <- function(x,...){
     
     # Create tables to save calculations
     ceramic.informed.occupation.ranges.matrix <- matrix(NA,nrow=nrow(test.set),ncol=length(seq(year.start,year.end,year.duration))+1)
-    smoothed.accuracy <- matrix(NA,nrow=1,ncol=100)
-    smoothed.accuracy.balanced <- matrix(NA,nrow=1,ncol=100)
+    smoothed.accuracy <- matrix(NA,nrow=1,ncol=50)
+    smoothed.accuracy.balanced <- matrix(NA,nrow=1,ncol=50)
     
     # Bound any extreme site predictions by maximum ceramic ranges of production
     for(i in 1:nrow(test.set)) {
@@ -113,9 +114,9 @@ annIterations <- function(x,...){
       
     }
     
-    # Smooth results with windows of 1--100 to determine most accurate combination of model and smoothing
-    for(s in 1:100) {
-      
+    # Smooth results with windows of 1--50 to determine most accurate combination of model and smoothing
+    for(s in 1:50) {
+
       # Smooth predictions
       smoothing.range.predictions <- mapply(c(1:nrow(ceramic.informed.occupation.ranges.matrix)),FUN=function(x,...) { round(smoother::smth.gaussian(ceramic.informed.occupation.ranges.matrix[x,2:ncol(ceramic.informed.occupation.ranges.matrix)],window=s,tails=T)) } )
       smoothed.occupation.ranges.matrix <- as.matrix(t(smoothing.range.predictions))
@@ -148,7 +149,7 @@ annIterations <- function(x,...){
       
       # Produce confusion matrix by year to calculate annual accuracy, lower confidence interval, and upper confidence interval
       for(c in 1:ncol(predictions)) {
-        
+
         single.factor <- FALSE
         
         tryCatch({
@@ -162,6 +163,7 @@ annIterations <- function(x,...){
           occurance <- mean(as.matrix(predictions[,c]) + as.matrix(actual[,c]))
           
           if(occurance == 0 | occurance == 2) {
+            
             cm.accuracy <- 1
             cm.lower <- 1
             cm.upper <- 1
@@ -173,13 +175,19 @@ annIterations <- function(x,...){
           }
           
           else{
-            cm.accuracy <- 0
-            cm.lower <- 0
-            cm.upper <- 0
+            
+            difference <- abs(as.matrix(predictions[,c]) - as.matrix(actual[,c]))
+            st.dev <- stats::sd(difference)
+            
+            cm.accuracy <- 1 - mean(difference)
+            cm.lower <- cm.accuracy - (1.960 * (st.dev / base::sqrt(nrow(difference))))
+            cm.upper <- cm.accuracy + (1.960 * (st.dev / base::sqrt(nrow(difference))))
+            cm.upper[cm.upper > 1] <- 1
             
             cm.accuracy.annual[1,c] <- cm.accuracy
             cm.lower.annual[1,c] <- cm.lower
             cm.upper.annual[1,c] <- cm.upper
+            
           }
           
         }
@@ -197,8 +205,6 @@ annIterations <- function(x,...){
           cm.upper.annual[1,c] <- cm.upper
           
         }
-        
-        
         
       }
       
@@ -229,4 +235,3 @@ annIterations <- function(x,...){
 
 ##########################################################################################
 ##########################################################################################
-

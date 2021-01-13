@@ -26,9 +26,6 @@ for(p in packages) suppressPackageStartupMessages(library(p,quietly=T,character.
 base::dir.create('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/table-products',recursive=T,showWarnings=F)
 base::dir.create('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-final',recursive=T,showWarnings=F)
 base::dir.create('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/final',recursive=T,showWarnings=F)
-base::dir.create('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figures/stack-households-density',recursive=T,showWarnings=F)
-base::dir.create('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figures/stack-households-density-standardized',recursive=T,showWarnings=F)
-base::dir.create('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figures/stack-population-density',recursive=T,showWarnings=F)
 base::dir.create('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figures/stack-population-density-standardized',recursive=T,showWarnings=F)
 
 ##########################################################################################

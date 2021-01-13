@@ -392,6 +392,28 @@
 # 
 # #########################################################################################
 # #########################################################################################
+# ## Calculating annual rate of peak population decay by length of occupation, as reported in Ortman_et_al_2007:Figure 8
+# 
+# # Import table with values displayed in Ortman_et_al_2007:Figure 8
+# excavated.sites <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/DATABASE/TABLES/Ortman_et_al_2007-Figure-8.csv',header=T)
+# 
+# # Create sequences of peak population decay to distribute known years and changes through time by reported ranges of years
+# AD450.AD900 <- rep(excavated.sites[1,]$PEAK_DECAY,times=900-450)
+# AD900.AD1080 <- seq(excavated.sites[1,]$PEAK_DECAY,excavated.sites[2,]$PEAK_DECAY,(excavated.sites[2,]$PEAK_DECAY-excavated.sites[1,]$PEAK_DECAY)/(1080-900))
+# AD1080.AD1270 <- rep(excavated.sites[2,]$PEAK_DECAY,times=1270-1080)
+# AD1270.AD1300 <- rep(excavated.sites[3,]$PEAK_DECAY,times=1300-1270)
+# 
+# # Combine sequences of peak population decay by year
+# population.decay <- rbind(as.matrix(AD450.AD900),as.matrix(AD900.AD1080),as.matrix(AD1080.AD1270),as.matrix(AD1270.AD1300))
+# 
+# # Combine corresponding year with peak population decay
+# population.decay.by.year <- cbind(as.matrix(seq(450,1300,1)),population.decay)
+# 
+# # Save peak population decay by year
+# utils::write.csv(population.decay.by.year,'/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/table-products/population-decay-by-year.csv',row.names=F)
+# 
+# #########################################################################################
+# #########################################################################################
 # ## Calculating average life-expectancy by year, as reported in Kohler_and_Reese_2014:10104
 # 
 # # Create sequences of life-expectancy to evenly distribute changes through time by reported ranges of years
@@ -406,7 +428,7 @@
 # # Combine corresponding year with life-expectancy
 # life.expectancy.by.year <- cbind(as.matrix(seq(-900,1300,1)),life.expectancy)
 # 
-# # Save life expectancy by year
+# # Save life-expectancy by year
 # utils::write.csv(life.expectancy.by.year,'/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/table-products/life-expectancy-by-year.csv',row.names=F)
 # 
 ##########################################################################################
@@ -425,10 +447,10 @@ cultural.features.aggregated <- utils::read.csv('/Users/kmreese/Documents/PROJEC
 ceramics.aggregated <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/table-products/ceramics-aggregated.csv')
 
 # Life-expectancy by year
+population.decay.by.year <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/table-products/population-decay-by-year.csv')
+
+# Life-expectancy by year
 life.expectancy.by.year <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/table-products/life-expectancy-by-year.csv')
 
-
-
-
-
-
+##########################################################################################
+#########################################################################################
