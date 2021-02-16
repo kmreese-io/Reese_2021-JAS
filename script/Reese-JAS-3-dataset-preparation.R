@@ -434,12 +434,8 @@
 ##########################################################################################
 #########################################################################################
 ## Finalized datasets to load when running model
-
 # Tree ring data by increments
 tree.rings.aggregated.1 <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/table-products/tree-rings-aggregated-1.csv')
-tree.rings.aggregated.10 <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/table-products/tree-rings-aggregated-10.csv')
-tree.rings.aggregated.20 <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/table-products/tree-rings-aggregated-20.csv')
-tree.rings.aggregated.30 <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/table-products/tree-rings-aggregated-30.csv')
 tree.rings.aggregated.200 <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/table-products/tree-rings-aggregated-200.csv')
 
 # Cultural feature and ceramic information
@@ -452,5 +448,8 @@ population.decay.by.year <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/C
 # Life-expectancy by year
 life.expectancy.by.year <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/table-products/life-expectancy-by-year.csv')
 
-##########################################################################################
-#########################################################################################
+
+
+
+
+

@@ -147,13 +147,13 @@ unsurveyed.area <- raster::raster('/Users/kmreese/Documents/PROJECTS/DATABASE/SP
 
 ##########################################################################################
 ## Import occupation-by-household results to extrapolate known site locations to unsurveyed areas
-occupation.households <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/occupation-by-household.csv')
+population.households <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/occupation-by-household.csv')
 # Subset dataset by sites with < 9 total pitstructures
-small.sites <- occupation.households[which(occupation.households$PITSTRUCTURES < 9 & occupation.households$PITSTRUCTURES > 0),]
+small.sites <- population.households[which(population.households$PITSTRUCTURES < 9 & population.households$PITSTRUCTURES > 0),]
 # Create matrix and file to export calculated extrapolated households
 total.extrapolated.households <- matrix(NA,nrow=8,ncol=ncol(small.sites[,8:ncol(small.sites)]))
 colnames(total.extrapolated.households) <- as.character(c(year.start:year.end))
-utils::write.csv(total.extrapolated.households,file='/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/extrapolated-occupation-by-household.csv',row.names=as.character(c(1:8)))
+utils::write.csv(total.extrapolated.households,file='/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/extrapolated-population-by-household.csv',row.names=as.character(c(1:8)))
 
 ##########################################################################################
 ## Household extrapolation model from surveyed to unsurveyed areas
@@ -161,7 +161,7 @@ utils::write.csv(total.extrapolated.households,file='/Users/kmreese/Documents/PR
 for(years in 8:ncol(small.sites)) {
 
   # Load file with extrapolated predictions
-  total.extrapolated.households <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/extrapolated-occupation-by-household.csv',header=T,row.names=1)
+  total.extrapolated.households <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/extrapolated-population-by-household.csv',header=T,row.names=1)
   # Identify households occupied with 1--8 pitstructures for given year
   year.occupation <- small.sites[which(small.sites[,years] > 0),]
   
@@ -169,11 +169,11 @@ for(years in 8:ncol(small.sites)) {
   no.occupation <- FALSE
   tryCatch({
     
-    occupation.households.spatial <- base::matrix(NA,nrow=nrow(year.occupation),ncol=2)
-    occupation.households.spatial[,1] <- year.occupation$X_COORDS
-    occupation.households.spatial[,2] <- year.occupation$Y_COORDS
-    occupation.households.spatial <- sp::SpatialPointsDataFrame(coords=occupation.households.spatial,year.occupation,proj4string=master.projection)
-    names(occupation.households.spatial) <- names(year.occupation)
+    population.households.spatial <- base::matrix(NA,nrow=nrow(year.occupation),ncol=2)
+    population.households.spatial[,1] <- year.occupation$X_COORDS
+    population.households.spatial[,2] <- year.occupation$Y_COORDS
+    population.households.spatial <- sp::SpatialPointsDataFrame(coords=population.households.spatial,year.occupation,proj4string=master.projection)
+    names(population.households.spatial) <- names(year.occupation)
     
   },
   
@@ -258,7 +258,7 @@ for(years in 8:ncol(small.sites)) {
         raster.probabilities.unsurveyed <- raster::mask(raster.probabilities,unsurveyed.area)
         
         # Multiply ratio of knowingly occupied cells in surveyed area with number of cells in unsurveyed area with >= average predictive values of knowingly occupied raster cells
-        n.probable.sites.unsurveyed <- round(length(raster.probabilities.unsurveyed[raster.probabilities.unsurveyed >= mean.probabilities]) * proportion.locations.surveyed)
+        n.probable.sites.unsurveyed <- length(raster.probabilities.unsurveyed[raster.probabilities.unsurveyed >= mean.probabilities]) * proportion.locations.surveyed
         
         # Multiply predicted number of unrecorded sites with given number of pitstructures by average number of households occupied for recorded sites with the given number of pitstructures within the given year
         extrapolated.households <- round(n.probable.sites.unsurveyed * mean(sites.by.pitstructure[,years]))
@@ -283,7 +283,128 @@ for(years in 8:ncol(small.sites)) {
   }
   
   # Save number of extrapolated households by pitstructure for given year
-  write.csv(total.extrapolated.households,file='/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/extrapolated-occupation-by-household.csv',row.names=as.character(c(1:8)))
+  write.csv(total.extrapolated.households,file='/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/extrapolated-population-by-household.csv',row.names=as.character(c(1:8)))
+  
+}
+
+##########################################################################################
+##########################################################################################
+##########################################################################################
+##########################################################################################
+## Apply the same extrapolation prediction process to VEP II household predictions
+
+##########################################################################################
+## Load VEP II database, momentization information, and limit extrapolated households to small sites
+vepii.database <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/DATABASE/TABLES/vepii-database/vepii-n-results.csv')
+vepii.momentization <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/DATABASE/TABLES/vepii-momentization.csv')
+vepii.households <- vepii.database[which(vepii.database$TOTPITST < 9 & vepii.database$TOTPITST > 0 & vepii.database$recordtypedesc == 'Habitation' ),]
+vepii.extrapolated.households <- matrix(NA,nrow=1,ncol=14)
+colnames(vepii.extrapolated.households) <- as.character(c(vepii.momentization[1,]$PERIOD:vepii.momentization[14,]$PERIOD))
+utils::write.csv(vepii.extrapolated.households,file='/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/vepii-extrapolated-households.csv')
+
+vepii.extrapolated.population <- matrix(NA,nrow=8,ncol=14)
+
+for(c in 48:61) {
+  
+  # Load file with extrapolated predictions
+  vepii.extrapolated.households <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/vepii-extrapolated-households.csv',header=T,row.names=1)
+  # Identify households occupied with 1--8 pitstructures for given year
+  year.occupation <- vepii.households[which(vepii.households[,c] >= 1 ),]
+  
+  start <- vepii.momentization[c-47,]$START - 429
+  end <- vepii.momentization[c-47,]$END - 429
+  
+  # Average years in modeling period for predictive layers 7--9
+  # Prediction layer: Average annual growing degree days (temperature)
+  layer.7 <- raster::stackApply(temperature[[start:end]],indices=nlayers(temperature[[start:end]]),fun='mean')
+  # Prediction layer: Average annual precipitation
+  layer.8 <- raster::stackApply(precipitation[[start:end]],indices=nlayers(precipitation[[start:end]]),fun='mean')
+  # Prediction layer: Average annual maize growing niche
+  layer.9 <- raster::stackApply(growing.niche[[start:end]],indices=nlayers(growing.niche[[start:end]]),fun='mean')
+  # Stack complete set of predictive raster layers 1--9
+  raster.stack <- raster::stack(prior.stack,layer.7,layer.8,layer.9)
+  
+  # Complete predictive model for sites by total number of recorded pitstructures 1--8
+  for(pitstructures in 1:8) {
+    
+    # Identify sites with given number of pitstructures for given year
+    sites.by.pitstructure <- year.occupation[year.occupation$TOTPITST == pitstructures, ]
+    
+    # If no households with given number of pitstructures are predicted to be occupied in the given year, enter 0 extrapolated households, and proceed to following number of pitstructures
+    no.sites.by.pitstructure <- FALSE
+    tryCatch({ 
+      
+      known.coordinates <- base::matrix(NA,nrow=nrow(sites.by.pitstructure),ncol=2)
+      known.coordinates[,1] <- sites.by.pitstructure$UTMEast
+      known.coordinates[,2] <- sites.by.pitstructure$UTMNorth
+      known.coordinates <- sp::SpatialPointsDataFrame(coords=known.coordinates,sites.by.pitstructure,proj4string=nad27.projection)
+      known.coordinates <- sp::spTransform(known.coordinates,master.projection)
+      names(known.coordinates) <- names(sites.by.pitstructure)
+      
+    },
+    
+    error = function(e) { no.sites.by.pitstructure <<- TRUE})
+    
+    if(no.sites.by.pitstructure == TRUE) {
+      
+      vepii.extrapolated.population[pitstructures,(c-47)] <- 0
+      
+    }
+    
+    # If households with given number of pitstructures are predicted to be occupied in the given year, continue prediction
+    else{
+      
+      known.coordinates <- base::matrix(NA,nrow=nrow(sites.by.pitstructure),ncol=2)
+      known.coordinates[,1] <- sites.by.pitstructure$UTMEast
+      known.coordinates[,2] <- sites.by.pitstructure$UTMNorth
+      known.coordinates <- sp::SpatialPointsDataFrame(coords=known.coordinates,sites.by.pitstructure,proj4string=nad27.projection)
+      known.coordinates <- sp::spTransform(known.coordinates,master.projection)
+      names(known.coordinates) <- names(sites.by.pitstructure)
+      
+      # Run predictive model using complete set of predictive raster layers 1--9 and coordinates of occupied households with given number of pitstructures
+      max.entropy <- dismo::maxent(raster.stack,sp::coordinates(known.coordinates),removeDuplicates=F)
+      raster.probabilities <- dismo::predict(max.entropy,raster.stack)
+      
+      # Extract predictive probabilities for knowingly occupied cells and average predictive values
+      mean.probabilities <- mean(raster:::extract(raster.probabilities,sp::coordinates(known.coordinates)))
+      
+      # Limit predictive raster values by surveyed area
+      raster.probabilities.surveyed <- raster::mask(raster.probabilities,surveyed.area)
+      
+      # Determine ratio of knowingly occupied cells within surveyed area with total surveyed cells with predictive raster values >= average predictive values of knowingly occupied raster cells
+      proportion.locations.surveyed <- nrow(sp::coordinates(known.coordinates)) / length(raster.probabilities.surveyed[raster.probabilities.surveyed >= mean.probabilities])
+      
+      # Limit predictive raster values by unsurveyed area
+      raster.probabilities.unsurveyed <- raster::mask(raster.probabilities,unsurveyed.area)
+      
+      # Multiply ratio of knowingly occupied cells in surveyed area with number of cells in unsurveyed area with >= average predictive values of knowingly occupied raster cells
+      n.probable.sites.unsurveyed <- length(raster.probabilities.unsurveyed[raster.probabilities.unsurveyed >= mean.probabilities]) * proportion.locations.surveyed
+      
+      # Multiply predicted number of unrecorded sites with given number of pitstructures by average number of households occupied for recorded sites with the given number of pitstructures within the given year
+      extrapolated.households <- round(n.probable.sites.unsurveyed * mean(sites.by.pitstructure[,c]))
+      
+      # Write extrapolated results for small sites to column representing the given year
+      vepii.extrapolated.population[pitstructures,(c-47)] <- extrapolated.households
+      
+    }
+    
+    
+  }
+  
+  # Combine extrapolated households with known households
+  summed.households <- sum(vepii.extrapolated.population[,c-47]) + sum(year.occupation[,c])
+  
+  # Momentize the total number of predicted households
+  ss.momentized.households <- summed.households * (vepii.momentization[c-47,]$USELIFE_SS / vepii.momentization[c-47,]$DURATION)
+  
+  cc.households <- sum(vepii.database[which(vepii.database$TOTPITST >= 9 & vepii.database$recordtypedesc == 'Habitation' & vepii.database[,c] >= 1 ),c])
+  cc.momentized.households <- cc.households * (vepii.momentization[c-47,]$USELIFE_CC / vepii.momentization[c-47,]$DURATION)
+  
+  total.momentized.households <- round(ss.momentized.households + cc.momentized.households)
+  
+  # Collect and save total households per modeling period
+  vepii.extrapolated.households[,c-47] <- total.momentized.households
+  utils::write.csv(vepii.extrapolated.households,file='/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/vepii-extrapolated-households.csv')
   
 }
 

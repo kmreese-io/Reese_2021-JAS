@@ -52,7 +52,8 @@ vepii.coords[,2] <- vepii.ceramics.coords$UTMNorth
 vepii.coords <- sp::SpatialPointsDataFrame(coords=vepii.coords,vepii.ceramics.coords,proj4string=nad27.projection)
 vepii.coords <- sp::spTransform(vepii.coords,master.projection)
 vepii.mvnes.coords <- vepii.coords[mvnes.survey,]
-vepii <- as.data.frame(vepii.coords)[!(as.data.frame(vepii.coords)$SITE_ID %in% as.data.frame(vepii.mvnes.coords)$SITE_ID),]
+vepii.all <- as.data.frame(vepii.coords)[!(as.data.frame(vepii.coords)$SITE_ID %in% as.data.frame(vepii.mvnes.coords)$SITE_ID),]
+vepii <- as.data.frame(vepii.coords)[!(as.data.frame(vepii.all)$SITE_ID %in% as.data.frame(tree.rings.aggregated.1)$SITE_ID),]
 
 # Combine columns of ceramics with overlapping typologies 
 vepii$BW_MANCOS <- dplyr::coalesce(vepii$BW_MANCOS,vepii$BW_WETHERILL)
@@ -115,7 +116,22 @@ names(ceramic.informed.occupation) <- c('SITE_ID',paste(seq(year.start,year.end,
 # Combine predictions with corresponding site information
 vepii.information <- base::as.data.frame(vepii %>% dplyr::select('SITE_ID','SITE_NO','recordtypedesc','roomblock.area..m2.','TOTPITST','coords.x1','coords.x2'))
 names(vepii.information) <- c('SITE_ID','SITE_NO','PRIMARY','ROOMBLOCK_AREA','PITSTRUCTURES','X_COORDS','Y_COORDS')
-vepii.occupation.predictions <- tibble::as_tibble(base::merge(vepii.information,ceramic.informed.occupation,by='SITE_ID'))
+vepii.predictions <- as.data.frame(tibble::as_tibble(base::merge(vepii.information,ceramic.informed.occupation,by='SITE_ID')))
+
+# Add sites with known dating information
+vepii.database.coords <- base::matrix(NA,nrow=nrow(vepii.database),ncol=2)
+vepii.database.coords[,1] <- vepii.database$UTMEast
+vepii.database.coords[,2] <- vepii.database$UTMNorth
+vepii.database.coords <- sp::SpatialPointsDataFrame(coords=vepii.database.coords,vepii.database,proj4string=nad27.projection)
+vepii.database.coords <- sp::spTransform(vepii.database.coords,master.projection)
+known.sites <- as.data.frame(vepii.database.coords)[(as.data.frame(vepii.database.coords)$SITE_ID %in% as.data.frame(tree.rings.aggregated.1)$SITE_ID),]
+known.dataset.information <- base::as.data.frame(known.sites %>% dplyr::select('SITE_ID','SITE_NO','recordtypedesc','roomblock.area..m2.','TOTPITST','coords.x1','coords.x2'))
+names(known.dataset.information) <- c('SITE_ID','SITE_NO','PRIMARY','ROOMBLOCK_AREA','PITSTRUCTURES','X_COORDS','Y_COORDS')
+known.information <- base::merge(known.dataset.information,tree.rings.aggregated.1[,c(1,7:ncol(tree.rings.aggregated.1))],by='SITE_ID')
+
+# Merge known and predicted site information
+names(vepii.predictions) <- names(known.information)
+vepii.occupation.predictions <- rbind(vepii.predictions,known.information)
 
 # Save prediction results for VEP II sites (excluding those within the Mesa Verde North Escarpment dataset)
 utils::write.csv(vepii.occupation.predictions,'/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/occupation-probability-vepii.csv',row.names=F)
@@ -196,6 +212,8 @@ utils::write.csv(mvnes.occupation.predictions,'/Users/kmreese/Documents/PROJECTS
 ##########################################################################################
 ##########################################################################################
 ## Combine VEP II predictions with predictions for Mesa Verde North Escarpment
+vepii.occupation.predictions <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/occupation-probability-vepii.csv')
+mvnes.occupation.predictions <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/occupation-probability-mvnes.csv')
 region.occupation.predictions <- base::rbind(vepii.occupation.predictions,mvnes.occupation.predictions)
 names(region.occupation.predictions) <- c('SITE_ID','SITE_NO','PRIMARY','ROOMBLOCK_AREA','PITSTRUCTURES','X_COORDS','Y_COORDS',as.character(seq(year.start,year.end,year.duration)))
 
@@ -207,7 +225,8 @@ utils::write.csv(region.occupation.predictions,'/Users/kmreese/Documents/PROJECT
 ## Predict occupations of sites with no recorded ceramic assemblages, or those with no diagnostic wares, based on closest Euclidean distances
 
 # Identify sites within VEP II database with no known ceramic assemblages, or no diagnostic ceramic wares, and convert to SpatialPointsDataFrame (site with no ANN prediction)
-sites.no.ceramics <- base::subset(vepii.database,!(vepii.database$SITE_ID %in% region.occupation.predictions$SITE_ID))
+
+sites.no.ceramics <- as.data.frame(vepii.coords)[!(as.data.frame(vepii.coords)$SITE_ID %in% as.data.frame(region.occupation.predictions)$SITE_ID),]
 no.ceramics.coords.nad27 <- base::matrix(NA,nrow=nrow(sites.no.ceramics),ncol=2)
 no.ceramics.coords.nad27[,1] <- sites.no.ceramics$UTMEast
 no.ceramics.coords.nad27[,2] <- sites.no.ceramics$UTMNorth

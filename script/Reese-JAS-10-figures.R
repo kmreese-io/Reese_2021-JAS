@@ -200,7 +200,7 @@ grDevices::dev.off()
 ##########################################################################################
 ## FIGURE 4: SIX-YEAR EXAMPLE RESULT (AD 1055--1060) OF OCCUPIED RESIDENCES, WITH WEIGHTED DENSITY BY NUMBER OF HOUSHEOLDS (ONLY INCLUDE RECORDED SITES WITHIN SURVEYED AREAS)  
 
-# Import occupation-by-household for density plot of residences within surveyed areas, weighted by numbers of households
+# Import population-by-household for density plot of residences within surveyed areas, weighted by numbers of households
 occupation.household <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/occupation-by-household.csv')
 
 # Define full range of years in study
@@ -529,15 +529,15 @@ grDevices::dev.off()
 ##########################################################################################
 ## FIGURE 5: PREDICTIVE MODEL EXAMPLE FOR RESIDENTIAL SITE EXTRAPOLATION - AD 1060 WITH FOUR PITSTRUCTURES
 
-# Import occupation-by-households for use in predictive model
-occupation.households <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/occupation-by-household.csv')
+# Import population-by-household for use in predictive model
+occupation.household <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/occupation-by-household.csv')
 
-# Define example year, example site size, and subset occupation-by-households with example parameters
+# Define example year, example site size, and subset population-by-household with example parameters
 sample.year <- 1060
 start <- sample.year - 410 - 20
 end <- sample.year - 410
-column <- which(colnames(occupation.households) == paste('X',sample.year,sep=''))
-dating.data <- occupation.households[which(occupation.households[,column] > 0 ),]
+column <- which(colnames(occupation.household) == paste('X',sample.year,sep=''))
+dating.data <- occupation.household[which(occupation.household[,column] > 0 ),]
 dating.data <- dating.data[which(dating.data$PITSTRUCTURES == 4 ),]
 
 # Create SpatialPointsDataFrame with example sites
@@ -588,7 +588,7 @@ unsurveyed.area <- raster::raster('/Users/kmreese/Documents/PROJECTS/DATABASE/SP
 # max.entropy <- dismo::maxent(raster.stack,sp::coordinates(known.coordinates),removeDuplicates=F)
 # raster.probabilities <- dismo::predict(max.entropy,raster.stack)
 # # Predictive example raster: AD 1060 with four pitstructures
-# predictive.example <- raster::writeRaster(raster.probabilities,'/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figures/predictive-example')
+# predictive.example <- raster::writeRaster(raster.probabilities,'/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figures/predictive-example',overwrite=T)
 predictive.example <- raster::raster('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figures/predictive-example')
 raster::projection(predictive.example) <- master.projection
 
@@ -730,14 +730,14 @@ grDevices::dev.off()
 ## FIGURE 6: DEMOGRAPHICICS WITH KNOWN OCCUPIED HOUSEHOLDS, AND TOTAL POPULATION RECONSTRUCTION
 
 # VEP II midpoints of modeling periods
-vepii.midpoints.rearranged <- c(600,662.5,740,840,880,900,920,980,1010,1048,1140,1154,1180,1260,1280,1300)
+vepii.midpoints <- c(600,662.5,762.5,820,860,900,950,1000,1040,1080,1120,1160,1202.5,1242.5,1270,1300)
 
-# Total population calculated by Schwindt et al. 2016, reported in Table 2
-vepii.population <- c(0,262+2669,434+3103,1100+9423,1218+10300,962+3769,465+3693,533+8056,822+8560,1842+12792,2064+18677,2310+18688,3858+15320,7638+19057,6594+15198,0)
+# Total households calculated by Schwindt et al. 2016, and extrapolated using predictive model
+vepii.calculated.population <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/vepii-extrapolated-households.csv',row.names=1)
+vepii.calculated.population <- as.matrix(c(0,as.numeric(vepii.calculated.population),0))
 
-# Raw numbers of known habitation sites predicted to be occupied per year by the artificial neural network
-occupation.households <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/occupation-by-household.csv')
-sum.occupation.households <- as.matrix(as.numeric(colSums(occupation.households[,8:ncol(occupation.households)])))
+# Final household occupation predictions by recorded residential site
+occupation.household <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/occupation-by-household.csv')
 
 # Final population predictions with extrapolated results and smoothed by life-expectancy (file shows households, must be multiplied by 3, 5, and 7 for total range of potential numbers of people)
 region.occupation.population <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/final/region-occupation-by-population.csv',row.names=1)
@@ -749,36 +749,43 @@ grDevices::pdf('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figur
 graphics::par(mfrow=c(1,1),bg=NA,mai=c(0.5,0.6,0.10,0.6),oma=c(0.5,0.5,0.5,0.5))
 
 # Plotting environment
-graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end+5),ylim=c(0,5500),xaxs='i',yaxs='i',axes=F,main='')
+graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end+5),ylim=c(0,23500),xaxs='i',yaxs='i',axes=F,main='')
 
 # Pueblo time periods refined by this analysis
-graphics::abline(v=c(460,710,900,1150,1290),col='gray30',lty=5,lwd=1.5,xpd=F)
+graphics::abline(v=c(470,710,890,1145,1295),col='gray30',lty=5,lwd=1.5,xpd=F)
 
 # Periods of transition from exploration to exploitation, identified by results presented here, following @Bocinsky_et_al_2016
-graphics::abline(v=c(600,770,1035,1205),col='gray',lty=3,lwd=1.5,xpd=F)
+graphics::abline(v=c(600,790,1035,1200),col='gray',lty=3,lwd=1.5,xpd=F)
 
-# (RED) Raw numbers of known habitation sites predicted to be occupied per year by the artificial neural network
-graphics::lines(seq(year.start,year.end,year.duration),sum.occupation.households,col='#9E0142',lwd=1)
+# (PURPLE) Previously-calculated VEP II results, extrapolated using predictive model, plotted by midpoints of modeling periods
+graphics::polygon(c(vepii.midpoints,rev(vepii.midpoints)),c(vepii.calculated.population * 7,rev(vepii.calculated.population * 3.3)),col=scales::alpha('#5E4FA2',alpha=0.15),border=NA)
+graphics::lines(vepii.midpoints,(vepii.calculated.population * 6),col=scales::alpha('#5E4FA2',alpha=0.4),lwd=1.5)
 
-# (4) Axes and labels for plotting environment
-graphics::axis(4,at=seq(0,5000,1000),col='#9E0142',tick=T,labels=F)
-graphics::mtext(as.character(seq(0,5000,1000)),at=as.character(seq(0,5000,1000)),col='#9E0142',side=4,line=0.75,cex=0.75,las=2)
-graphics::mtext('Number of Occupied Residences',col='#9E0142',side=4,line=2.5)
+# (GRAY) Final population predictions with extrapolated results and smoothed by life-expectancy (multiplied by 3.3 and 6)
+graphics::polygon(c(seq(year.start,year.end,year.duration),rev(seq(year.start,year.end,year.duration))),c((region.occupation.population[,1] * 7),rev((region.occupation.population[,1] * 3.3))),col=scales::alpha('gray75',alpha=0.60),border=NA)
 
 # Call new plot
 graphics::par(new=T)
 
 # Plotting environment
-graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end+5),ylim=c(0,31000),xaxs='i',yaxs='i',axes=F,main='')
+graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end+5),ylim=c(0,4700),xaxs='i',yaxs='i',axes=F,main='')
 
-# (PURPLE) Previously-calculated VEP II results, plotted by midpoints of modeling periods
-graphics::lines(vepii.midpoints,(vepii.midpoints.rearranged),col=scales::alpha('#5E4FA2',alpha=0.4),lwd=1.5)
+# (RED) Raw numbers of known habitation sites predicted to be occupied per year by the artificial neural network
+graphics::lines(seq(year.start,year.end,year.duration),c(colSums(occupation.household[,8:ncol(occupation.household)])),col='#9E0142',lwd=1)
 
-# (GRAY) Final population predictions with extrapolated results and smoothed by life-expectancy (multiplied by 3 and 7)
-graphics::polygon(c(seq(year.start,year.end,year.duration),rev(seq(year.start,year.end,year.duration))),c((region.occupation.population[,1] * 6),rev((region.occupation.population[,1] * 3.3))),col=scales::alpha('gray40',alpha=0.4),border=NA)
+# (4) Axes and labels for plotting environment
+graphics::axis(4,at=seq(0,4700,1000),col='#9E0142',tick=T,labels=F)
+graphics::mtext(as.character(seq(0,4700,1000)),at=as.character(seq(0,4700,1000)),col='#9E0142',side=4,line=0.75,cex=0.75,las=2)
+graphics::mtext('Recorded Occupied Residences',col='#9E0142',side=4,line=2.5)
 
-# (BLACK) Final population predictions with extrapolated results and smoothed by life-expectancy (multiplied by 5)
-graphics::lines(seq(year.start,year.end,year.duration),((region.occupation.population[,1] * mean(c(3.3,6)))),col='black',lwd=3)
+# Call new plot
+graphics::par(new=T)
+
+# Plotting environment
+graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end+5),ylim=c(0,23500),xaxs='i',yaxs='i',axes=F,main='')
+
+# (BLACK) Final population predictions with extrapolated results and smoothed by life-expectancy (multiplied by 6 people per household)
+graphics::lines(seq(year.start,year.end,year.duration),(region.occupation.population[,1] * 6),col='black',lwd=3)
 
 # (1) Axes and labels for plotting environment
 graphics::axis(1,at=seq(500,year.end,100),tick=T,labels=F,col='black')
@@ -786,20 +793,21 @@ graphics::mtext(as.character(seq(500,year.end,100)),side=1,line=0.5,at=seq(500,1
 graphics::mtext('Years (AD)',side=1,line=1.5,col='black')
 
 # (2) Axes and labels for plotting environment
-graphics::axis(2,at=seq(0,30000,5000),tick=T,labels=F)
-graphics::mtext(as.character(seq(0,30000,5000)),at=as.character(seq(0,30000,5000)),side=2,line=0.75,cex=0.75,las=2)
+graphics::axis(2,at=seq(0,23500,5000),tick=T,labels=F)
+graphics::mtext(as.character(seq(0,23500,5000)),at=as.character(seq(0,23500,5000)),side=2,line=0.75,cex=0.75,las=2)
 graphics::mtext('Total Regional Population',side=2,line=2.5)
-# graphics::mtext('Total Regional Population',side=2,line=3)
 
 # Labels for plot
-graphics::text(460+((710-460)/2),31000,'Basketmaker III',xpd=T)
-graphics::text(710+((900-710)/2),31000,'Pueblo I',xpd=T)
-graphics::text(900+((1150-900)/2),31000,'Pueblo II',xpd=T)
-graphics::text(1150+((1295-1150)/2),31000,'Pueblo III',xpd=T)
+graphics::text(460+((710-460)/2),23500,'Basketmaker III',xpd=T)
+graphics::text(710+((900-710)/2),23500,'Pueblo I',xpd=T)
+graphics::text(900+((1150-900)/2),23500,'Pueblo II',xpd=T)
+graphics::text(1150+((1295-1150)/2),23500,'Pueblo III',xpd=T)
 
 # Finish building figure
 grDevices::dev.off()
 
+##########################################################################################
+##########################################################################################
 ##########################################################################################
 ##########################################################################################
 ## Figure SI: Annual household density from AD 450--1300, standardized density range across years
@@ -843,6 +851,10 @@ for(d in column.start:column.end) {
   
   density.extremes[d-(column.start-1),] <- c(min(density.plot),max(density.plot))
 }
+
+##########################################################################################
+##########################################################################################
+## Begin building Supplemental Material 1
 
 for(i in column.start:column.end) {
   
@@ -941,3 +953,141 @@ for(i in column.start:column.end) {
 
 ##########################################################################################
 ##########################################################################################
+##########################################################################################
+##########################################################################################
+## Figure SI: Area Under the Curve
+
+## Universal model parameters
+setwd('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/')
+year.duration <- 1
+year.start <- 450
+year.end <- utils::tail(seq(year.start,1300,year.duration),n=1)
+tree.rings.aggregated <- tree.rings.aggregated.1
+
+## Identify optimal model parameters based on accuracy results from iterations with defined universal model parameters
+node.iterations <- utils::read.csv(paste('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-iterations/',year.start,'-',year.end,'x',year.duration,'/smoothing-tests/accuracy-balanced.csv',sep=''),header=F)
+node.optimal.position <- which(node.iterations == max(node.iterations[,2:ncol(node.iterations)]),arr.ind=T)
+node.optimal <- node.iterations[node.optimal.position[1],1]
+percent.optimal <- (node.iterations[node.optimal.position[1],node.optimal.position[2]]) * 100
+smoothing.windows <- c(1:50)
+window.optimal <- smoothing.windows[(node.optimal.position[2] - 1)]
+
+# Combine columns of ceramics with overlapping typologies 
+dataset <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/table-products/dataset-aggregated-1.csv')
+dataset$BW_MANCOS <- dplyr::coalesce(dataset$BW_MANCOS,dataset$BW_WETHERILL)
+dataset <- base::as.data.frame(dataset %>% dplyr::select('SITE_ID','GRAY_CHAPIN','GRAY_MOCCASIN','GRAY_MANCOS','CORRUGATED_DOLORES','CORRUGATED_MESAVERDE','RO_ABAJO','BR_BLUFF','BR_DEADMANS','BW_CHAPIN','BW_PIEDRA','BW_CORTEZ','BW_MANCOS','BW_MCELMO','BW_MESAVERDE',paste('X',as.character(year.start),sep=''):ncol(dataset)))
+
+x <- dataset
+
+set.seed(471919)
+split <- caTools::sample.split(x,SplitRatio=0.8)
+training.set.original <- base::subset(x,split == T)
+training.set.original <- training.set.original[which(!is.na(training.set.original[,1])),]
+test.set.original <- base::subset(x,split == F)
+test.set.original <- test.set.original[which(!is.na(test.set.original[,1])),]
+
+# Identify columns with predictive variables (ceramic data)
+variable.columns <- length(2:which(colnames(test.set.original) == paste('X',year.start,sep='')))
+
+# Remove rows with no instances of predictive variables (no ceramic tallies)
+training.set.original <- training.set.original[rowSums(training.set.original[,2:variable.columns]) != 0 , ]
+test.set.original <- test.set.original[rowSums(test.set.original[,2:variable.columns]) != 0 , ]
+
+# Normalize the ceramic data across rows in training set - normalizing by SITE_ID
+training.normalized.matrix <- matrix(NA,nrow=nrow(training.set.original),ncol=(variable.columns-1))
+for(i in 1:nrow(training.set.original)) {
+  normalized.row <- as.matrix(normalize(training.set.original[i,2:(variable.columns)]))
+  training.normalized.matrix[i,] <- normalized.row
+}
+training.set <- as.data.frame(cbind(training.set.original[,1],unlist(training.normalized.matrix[,1:(variable.columns-1)]),training.set.original[(variable.columns+1):ncol(training.set.original)]))
+colnames(training.set) <- c(base::paste(as.character(colnames(x))))
+
+# Normalize the ceramic data across rows in test set - normalizing by SITE_ID
+test.normalized.matrix <- matrix(NA,nrow=nrow(test.set.original),ncol=(variable.columns-1))
+for(i in 1:nrow(test.set.original)) {
+  normalized.row <- as.matrix(normalize(test.set.original[i,2:(variable.columns)]))
+  test.normalized.matrix[i,] <- normalized.row
+}
+test.set <- as.data.frame(cbind(test.set.original[,1],unlist(test.normalized.matrix[,1:(variable.columns-1)]),test.set.original[(variable.columns+1):ncol(test.set.original)]))
+colnames(test.set) <- c(base::paste(as.character(colnames(x))))
+
+# Replace any NaNs with zeros
+training.set[is.na(training.set)] <- 0
+test.set[is.na(test.set)] <- 0
+
+# Load optimal artificial neural network
+ann.model <- readRDS('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/model-final/artificial-neural-network.rds')
+
+# Use neural network model to calculate site predictions and combine with known cutting dates
+predictions <- stats::predict(object=ann.model,newdata=test.set)
+predictions.SITE_ID <- base::as.data.frame(base::cbind(as.matrix(test.set[,1:variable.columns]),predictions))
+names(predictions.SITE_ID) <- names(test.set.original)
+predictions.SITE_NO <- base::merge(tree.rings.aggregated,predictions.SITE_ID,by='SITE_ID')
+
+# Import table of diagnostic ceramic types and corresponding date ranges
+nsj.ceramics <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/DATABASE/TABLES/database-nsj-ceramics-date-ranges.csv')
+diagnostic.ceramics <- nsj.ceramics[which(nsj.ceramics$DIAGNOSTIC == TRUE ),(ncol(nsj.ceramics)-1):ncol(nsj.ceramics)]
+diagnostic.ceramics.names <- nsj.ceramics[which(nsj.ceramics$DIAGNOSTIC == TRUE ),1]
+rownames(diagnostic.ceramics) <- diagnostic.ceramics.names
+
+# Create tables to save calculations
+ceramic.informed.occupation.ranges.matrix <- matrix(NA,nrow=nrow(test.set),ncol=length(seq(year.start,year.end,year.duration))+1)
+smoothed.accuracy <- matrix(NA,nrow=1,ncol=50)
+smoothed.accuracy.balanced <- matrix(NA,nrow=1,ncol=50)
+
+# Bound any extreme site predictions by maximum ceramic ranges of production
+for(i in 1:nrow(test.set)) {
+  
+  site.predictions <- predictions.SITE_NO[i,]
+  site.row <- test.set[i,2:variable.columns]
+  limit.types <- colnames(site.row[which(site.row[1,1:ncol(site.row)] > 0)])
+  type.names <- diagnostic.ceramics[c(limit.types),]
+  
+  date.range.minimum <- ifelse(plyr::round_any(min(c(type.names$START,type.names$END)),year.duration,f=floor) < year.start,year.start,plyr::round_any(min(c(type.names$START,type.names$END)),year.duration,f=floor))
+  date.range <- seq(date.range.minimum,plyr::round_any(max(c(type.names$START,type.names$END)),year.duration,f=floor),year.duration)
+  out.of.date.range <- seq(year.start,year.end,year.duration)
+  out.of.date.range <- out.of.date.range[!out.of.date.range %in% date.range]
+  
+  total.range.predicted <- predictions.SITE_NO[i,(which(colnames(predictions.SITE_NO) == paste('X',year.start,'.y',sep=''))):(which(colnames(predictions.SITE_NO) == paste('X',year.end,'.y',sep='')))]
+  ceramic.range.predicted <- total.range.predicted[colnames(total.range.predicted) %in% paste('X',date.range,'.y',sep='')]
+  normalize.new.range <- normalize(ceramic.range.predicted)
+  
+  combine.range.predictions <- rbind(cbind(date.range,t(normalize.new.range)),cbind(out.of.date.range,rep(0,times=length(out.of.date.range))))
+  order.range.predictions <- combine.range.predictions[order(combine.range.predictions[,1]),]
+  
+  isolate.range.predictions <- unname(order.range.predictions[,2])
+  ceramic.informed.occupation.ranges.matrix[i,] <- c(site.predictions[1,1],isolate.range.predictions)
+  
+}
+
+# Smooth results with optimal smoothing window
+smoothing.range.predictions <- mapply(c(1:nrow(ceramic.informed.occupation.ranges.matrix)),FUN=function(x,...) { smoother::smth.gaussian(ceramic.informed.occupation.ranges.matrix[x,2:ncol(ceramic.informed.occupation.ranges.matrix)],window=window.optimal,tails=T) } )
+smoothed.occupation.ranges.matrix <- as.matrix(t(smoothing.range.predictions))
+ceramic.smoothed.occupation <- as.data.frame(cbind(ceramic.informed.occupation.ranges.matrix[,1],smoothed.occupation.ranges.matrix))
+names(ceramic.smoothed.occupation) <- c('SITE_ID',paste('X',seq(year.start,year.end,year.duration),'.y',sep=''))
+
+# Organize actual/predicted occupations for accuracy calculations
+presence.absence.actual <- predictions.SITE_NO[,(which(colnames(predictions.SITE_NO) == paste('X',year.start,'.x',sep=''))):(which(colnames(predictions.SITE_NO) == paste('X',year.end,'.x',sep='')))]
+presence.absence.actual[presence.absence.actual > 0] <- 1
+actual <- presence.absence.actual
+predictions <- ceramic.smoothed.occupation[,2:ncol(ceramic.smoothed.occupation)]
+
+# Calculate Area Under the Curve
+res.roc <- pROC::roc(as.numeric(as.matrix(actual)),as.numeric(as.matrix(predictions)))
+
+##########################################################################################
+##########################################################################################
+## Begin building Supplemental Figure 1
+
+grDevices::pdf('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figures/Supplemental Figure 1.pdf')
+graphics::par(mfrow=c(1,1),bg=NA,mai=c(0.10,0.10,0.10,0.10),oma=c(0.5,0.5,0.5,0.5))
+
+# Plotting environment
+pROC::plot.roc(res.roc,print.auc=T,main='Area Under the Curve (AUC)')
+
+# Finish building figure
+grDevices::dev.off()
+
+##########################################################################################
+##########################################################################################
+

@@ -11,7 +11,7 @@
 ##########################################################################################
 ##########################################################################################
 ## R packages for analysis
-packages <-c('RColorBrewer','sp','rgeos','grDevices','tibble','dplyr','tidyr','caTools','caret','neuralnet','doParallel','spatstat','smoother')
+packages <-c('RColorBrewer','sp','rgeos','grDevices','tibble','dplyr','tidyr','caTools','caret','neuralnet','doParallel','spatstat','smoother','MLeval','pROC')
 for(p in packages) if(p %in% rownames(installed.packages()) == F) { install.packages(p) }
 for(p in packages) suppressPackageStartupMessages(library(p,quietly=T,character.only=T))
 devtools::install_github('bocinsky/paleocar')
