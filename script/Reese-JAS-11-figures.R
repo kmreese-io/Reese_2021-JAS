@@ -775,9 +775,9 @@ grDevices::dev.off()
 # VEP II midpoints of modeling periods
 vepii.midpoints <- c(600,662.5,762.5,820,860,900,950,1000,1040,1080,1120,1160,1202.5,1242.5,1270,1300)
 
-# Total households calculated by Schwindt et al. 2016, and extrapolated using predictive model
-vepii.reconstructed.population <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/table-products/vepii-reconstructed.csv')
-vepii.reconstructed.population <- c(0,as.numeric(unlist(vepii.reconstructed.population)),0)
+# Reconstructed total households from VEP II results folllowing methods reported in @Schwindt_et_al_2016, but using extrapolation method presented in this project
+vepii.calculated.households <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/vepii-extrapolated-households.csv',row.names=1)
+vepii.calculated.households <- c(0,as.numeric(unlist(vepii.calculated.households)),0)
 
 # Final household occupation predictions by recorded residential site
 occupation.household <- utils::read.csv('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/results/occupation-by-household.csv')
@@ -793,7 +793,7 @@ grDevices::pdf('/Users/kmreese/Documents/PROJECTS/CURRENT/Reese-JAS/output/figur
 graphics::par(mfrow=c(1,1),bg=NA,mai=c(0.5,0.6,0.10,0.6),oma=c(0.5,0.5,0.5,0.5))
 
 # Plotting environment
-graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end+5),ylim=c(0,25500),xaxs='i',yaxs='i',axes=F,main='')
+graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end+5),ylim=c(0,30500),xaxs='i',yaxs='i',axes=F,main='')
 
 # Pueblo time periods refined by this analysis
 graphics::abline(v=c(470,710,890,1145,1295),col='gray30',lty=5,lwd=1.5,xpd=F)
@@ -801,9 +801,9 @@ graphics::abline(v=c(470,710,890,1145,1295),col='gray30',lty=5,lwd=1.5,xpd=F)
 # Periods of transition from exploration to exploitation, identified by results presented here, following @Bocinsky_et_al_2016
 graphics::abline(v=c(600,790,1035,1200),col='gray',lty=3,lwd=1.5,xpd=F)
 
-# (PURPLE) Reconstructed VEP II results, with reported informal 80% confidence intervals, plotted by midpoints of modeling periods
-graphics::polygon(c(vepii.midpoints,rev(vepii.midpoints)),c(((vepii.reconstructed.population / 6) * 7),rev(((vepii.reconstructed.population / 6) * 3.3))),col=scales::alpha('#5E4FA2',alpha=0.15),border=NA)
-graphics::lines(vepii.midpoints,(vepii.reconstructed.population),col=scales::alpha('#5E4FA2',alpha=0.4),lwd=1.5)
+# (PURPLE) VEP II results, with reported informal 80% confidence intervals, plotted by midpoints of modeling periods
+graphics::polygon(c(vepii.midpoints,rev(vepii.midpoints)),c((vepii.calculated.households * 7),rev(vepii.calculated.households * 3.3)),col=scales::alpha('#5E4FA2',alpha=0.15),border=NA)
+graphics::lines(vepii.midpoints,(vepii.calculated.households * 6),col=scales::alpha('#5E4FA2',alpha=0.4),lwd=1.5)
 
 # (GRAY) Final population predictions with extrapolated results and smoothed by life-expectancy (multiplied by 3.3 and 6)
 graphics::polygon(c(seq(year.start,year.end,year.duration),rev(seq(year.start,year.end,year.duration))),c((region.occupation.population[,1] * 7),rev((region.occupation.population[,1] * 3.3))),col=scales::alpha('gray75',alpha=0.60),border=NA)
@@ -812,21 +812,21 @@ graphics::polygon(c(seq(year.start,year.end,year.duration),rev(seq(year.start,ye
 graphics::par(new=T)
 
 # Plotting environment
-graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end+5),ylim=c(0,5500),xaxs='i',yaxs='i',axes=F,main='')
+graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end+5),ylim=c(0,3500),xaxs='i',yaxs='i',axes=F,main='')
 
 # (RED) Raw numbers of known habitation sites predicted to be occupied per year by the artificial neural network
 graphics::lines(seq(year.start,year.end,year.duration),c(colSums(occupation.household[,9:ncol(occupation.household)])),col='#9E0142',lwd=1)
 
 # (4) Axes and labels for plotting environment
-graphics::axis(4,at=seq(0,5500,1000),col='#9E0142',tick=T,labels=F)
-graphics::mtext(as.character(seq(0,5500,1000)),at=as.character(seq(0,5500,1000)),col='#9E0142',side=4,line=0.75,cex=0.75,las=2)
+graphics::axis(4,at=seq(0,3500,1000),col='#9E0142',tick=T,labels=F)
+graphics::mtext(as.character(seq(0,3500,1000)),at=as.character(seq(0,3500,1000)),col='#9E0142',side=4,line=0.75,cex=0.75,las=2)
 graphics::mtext('Recorded Occupied Residences',col='#9E0142',side=4,line=2.5)
 
 # Call new plot
 graphics::par(new=T)
 
 # Plotting environment
-graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end+5),ylim=c(0,25500),xaxs='i',yaxs='i',axes=F,main='')
+graphics::plot(1,type='n',xlab='',ylab='',xlim=c(year.start,year.end+5),ylim=c(0,30500),xaxs='i',yaxs='i',axes=F,main='')
 
 # (BLACK) Final population predictions with extrapolated results and smoothed by life-expectancy (multiplied by 6 people per household)
 graphics::lines(seq(year.start,year.end,year.duration),(region.occupation.population[,1] * 6),col='black',lwd=3)
@@ -837,15 +837,15 @@ graphics::mtext(as.character(seq(500,year.end,100)),side=1,line=0.5,at=seq(500,1
 graphics::mtext('Years (AD)',side=1,line=1.5,col='black')
 
 # (2) Axes and labels for plotting environment
-graphics::axis(2,at=seq(0,25500,5000),tick=T,labels=F)
-graphics::mtext(as.character(seq(0,25500,5000)),at=as.character(seq(0,25500,5000)),side=2,line=0.75,cex=0.75,las=2)
+graphics::axis(2,at=seq(0,30500,5000),tick=T,labels=F)
+graphics::mtext(as.character(seq(0,30500,5000)),at=as.character(seq(0,30500,5000)),side=2,line=0.75,cex=0.75,las=2)
 graphics::mtext('Total Regional Population',side=2,line=2.5)
 
 # Labels for plot
-graphics::text(460+((710-460)/2),25500,'Basketmaker III',xpd=T)
-graphics::text(710+((900-710)/2),25500,'Pueblo I',xpd=T)
-graphics::text(900+((1150-900)/2),25500,'Pueblo II',xpd=T)
-graphics::text(1150+((1295-1150)/2),25500,'Pueblo III',xpd=T)
+graphics::text(460+((710-460)/2),30500,'Basketmaker III',xpd=T)
+graphics::text(710+((900-710)/2),30500,'Pueblo I',xpd=T)
+graphics::text(900+((1150-900)/2),30500,'Pueblo II',xpd=T)
+graphics::text(1150+((1295-1150)/2),30500,'Pueblo III',xpd=T)
 
 # Finish building figure
 grDevices::dev.off()
